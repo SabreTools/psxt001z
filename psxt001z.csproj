@@ -8,8 +8,8 @@
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   
       <!-- Package Properties -->
-      <Authors>Dremora, Matt Nadareski</Authors>
-      <Description>C# port of Dremora's tool</Description>
+      <Authors>Kirill Korolyov , Matt Nadareski</Authors>
+      <Description>C# port of psxt001z as a library</Description>
       <Copyright>Copyright (c)2013 Dremora, Copyright (c)2018-2023 Matt Nadareski</Copyright>
       <PackageProjectUrl>https://github.com/SabreTools/</PackageProjectUrl>
       <PackageReadmeFile>README.md</PackageReadmeFile>
