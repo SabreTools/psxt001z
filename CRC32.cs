@@ -40,8 +40,11 @@
 
         #region Functions
 
-        public void ProcessCRC(byte[] pData, int pDataPtr, int nLen)
+        public void ProcessCRC(byte[]? pData, int pDataPtr, int nLen)
         {
+            if (pData == null)
+                return;
+
             uint crc = m_crc32;
             while (nLen-- != 0)
             {

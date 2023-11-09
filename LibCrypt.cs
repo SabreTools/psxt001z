@@ -28,7 +28,7 @@ namespace psxt001z
 
         public uint TimeOutValue { get; set; }
 
-        public byte[] DataBuffer { get; set; }
+        public byte[]? DataBuffer { get; set; }
 
         public uint SenseInfoOffset { get; set; }
 
@@ -657,7 +657,7 @@ namespace psxt001z
             return;
         }
 
-        internal static bool LibCryptDetect(string subPath, string sbiPath)
+        internal static bool LibCryptDetect(string subPath, string? sbiPath)
         {
             if (string.IsNullOrWhiteSpace(subPath) || !File.Exists(subPath))
                 return false;
@@ -685,7 +685,7 @@ namespace psxt001z
             }
 
             // sbi
-            Stream sbi = null;
+            Stream? sbi = null;
             if (sbiPath != null)
             {
                 sbi = File.OpenWrite(sbiPath);

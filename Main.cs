@@ -40,7 +40,7 @@ namespace psxt001z
                         }
 
                         string subPath = args[0];
-                        string sbiPath = null;
+                        string? sbiPath = null;
                         if (args.Length == 2)
                             sbiPath = args[1];
 
@@ -91,7 +91,7 @@ namespace psxt001z
 
                         bool isRiff = false;
                         bool? mode = null;
-                        string output = null;
+                        string? output = null;
                         for (int i = 5; i < args.Length; i++)
                         {
                             if (args[i] == "r")
@@ -364,7 +364,7 @@ namespace psxt001z
             {
                 infile = File.Open(input, FileMode.Open, FileAccess.Read);
             }
-            catch (Exception ex)
+            catch
             {
                 Console.WriteLine($"File {input} can't be found.");
                 return true;
@@ -544,9 +544,9 @@ namespace psxt001z
             sha1.TransformFinalBlock(Message_Digest, 0, Message_Digest.Length);
 
             Console.Write($"\rCRC-32: {crc.m_crc32:8x}                      \n");
-            Console.Write($"MD5:    {BitConverter.ToString(md5.Hash).Replace("-", string.Empty)}");
-            Console.WriteLine($"MD5:    {BitConverter.ToString(md5.Hash).Replace("-", string.Empty)}");
-            Console.WriteLine($"SHA-1:  {BitConverter.ToString(sha1.Hash).Replace("-", string.Empty)}");
+            Console.Write($"MD5:    {BitConverter.ToString(md5.Hash!).Replace("-", string.Empty)}");
+            Console.WriteLine($"MD5:    {BitConverter.ToString(md5.Hash!).Replace("-", string.Empty)}");
+            Console.WriteLine($"SHA-1:  {BitConverter.ToString(sha1.Hash!).Replace("-", string.Empty)}");
             Console.WriteLine();
             return 1;
         }
@@ -809,9 +809,10 @@ namespace psxt001z
             long numblocks = filesize / 2048;
             Stream bs = File.OpenWrite(directory + "\\000001.bs");
 
-            ushort a = 1;
-            ushort b = 0;
-            ushort c = 0;
+            // TODO: Figure out what these values were for
+            // ushort a = 1;
+            // ushort b = 0;
+            // ushort c = 0;
 
             byte[] ax = { 0, 0 };
             byte[] bx = { 0, 0 };

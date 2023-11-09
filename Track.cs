@@ -20,7 +20,7 @@ namespace psxt001z
         /// <summary>
         /// Output for saving the track data
         /// </summary>
-        private string OutputPath { get; set; }
+        private string? OutputPath { get; set; }
 
         /// <summary>
         /// Starting offset within the file
@@ -67,7 +67,7 @@ namespace psxt001z
         /// <summary>
         /// Cache for small file data
         /// </summary>
-        private byte[] FileContents { get; set; }
+        private byte[]? FileContents { get; set; }
 
         /// <summary>
         /// Cached file offset
@@ -83,7 +83,7 @@ namespace psxt001z
 
         #region Constructor
 
-        public Track(string filename, int start, int size, uint crc, bool isRiff = false, bool? mode = null, string output = null)
+        public Track(string filename, int start, int size, uint crc, bool isRiff = false, bool? mode = null, string? output = null)
         {
             InputPath = filename;
             InputStream = File.OpenRead(filename);
@@ -213,7 +213,7 @@ namespace psxt001z
             if (SaveTrack)
             {
                 byte[] buffer = new byte[1];
-                Stream f2 = File.Open(OutputPath, FileMode.Create, FileAccess.ReadWrite);
+                Stream f2 = File.Open(OutputPath ?? "default", FileMode.Create, FileAccess.ReadWrite);
                 if (IsRiff)
                     f2.Write(RiffData, 0, 44);
 
