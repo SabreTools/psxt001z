@@ -7,7 +7,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Version>0.21-beta1</Version>
+    <Version>0.21-beta2</Version>
 
     <!-- Package Properties -->
     <Authors>Kirill Korolyov , Matt Nadareski</Authors>
