@@ -7,28 +7,28 @@ namespace psxt001z
     {
         internal const int ZERO = 0;
 
-        internal const string VERSION = "v0.21 beta 1";
+        public const string VERSION = "v0.21 beta 1";
 
         /// <summary>
         /// BCD to Byte
         /// </summary>
-        internal static byte BinaryToInteger(byte b) => (byte)(b / 16 * 10 + b % 16);
+        public static byte BinaryToInteger(byte b) => (byte)(b / 16 * 10 + b % 16);
 
         /// <summary>
         /// Byte to BCD
         /// </summary>
-        internal static byte IntegerToBinary(byte i) => (byte)(i / 10 * 16 + i % 10);
+        public static byte IntegerToBinary(byte i) => (byte)(i / 10 * 16 + i % 10);
 
         /// <summary>
         /// Get a santized hex string from an input byte array
         /// </summary>
-        internal static string GetHexString(byte[] bytes) =>
+        public static string GetHexString(byte[] bytes) =>
             BitConverter.ToString(bytes).Replace("-", string.Empty);
 
         /// <summary>
         /// Get a santized hex string from an input byte array
         /// </summary>
-        internal static string GetHexString(byte[] bytes, int startIndex, int length) =>
+        public static string GetHexString(byte[] bytes, int startIndex, int length) =>
             BitConverter.ToString(bytes, startIndex, length).Replace("-", string.Empty);
     }
 }

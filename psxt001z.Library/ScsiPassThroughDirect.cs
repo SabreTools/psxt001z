@@ -1,7 +1,7 @@
 ﻿namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/libcrypt.h"/>
-    internal class ScsiPassThroughDirect
+    public class ScsiPassThroughDirect
     {
         public ushort Length { get; set; }
 

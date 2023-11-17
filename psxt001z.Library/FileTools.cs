@@ -5,7 +5,7 @@ using System.Text;
 namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/main.cpp"/>
-    internal class FileTools(Stream file)
+    public class FileTools(Stream file)
     {
         private readonly Stream _file = file;
 

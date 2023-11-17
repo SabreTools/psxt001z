@@ -5,7 +5,7 @@ using System.IO;
 namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/main.cpp"/>
-    internal class Track
+    public class Track
     {
         private readonly Stream _file;
 

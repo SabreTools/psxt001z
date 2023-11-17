@@ -1,7 +1,7 @@
 ﻿namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/main.cpp"/>
-    internal class CRC32
+    public class CRC32
     {
         private const uint CRC_POLY = 0xEDB88320;
 

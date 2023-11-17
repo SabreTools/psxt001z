@@ -10,7 +10,7 @@
     <Version>0.21-beta2</Version>
 
     <!-- Package Properties -->
-    <Authors>Kirill Korolyov , Matt Nadareski</Authors>
+    <Authors>Kirill Korolyov, Matt Nadareski</Authors>
     <Description>C# port of psxt001z as a library</Description>
     <Copyright>Copyright (c)2013 Dremora, Copyright (c)2018-2023 Matt Nadareski</Copyright>
     <PackageProjectUrl>https://github.com/SabreTools/</PackageProjectUrl>
@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>

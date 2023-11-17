@@ -10,27 +10,27 @@ namespace psxt001z
     public partial class LibCrypt
     {
         // TODO: Implement
-        internal static byte DetectLibCryptDrive(string[] args)
+        public static byte DetectLibCryptDrive(string[] args)
         {
             Console.WriteLine("Not implemented, requires direct drive access");
             return 0x00;
         }
 
         // TODO: Implement
-        internal static byte DetectLibCryptDriveFast(string[] args)
+        public static byte DetectLibCryptDriveFast(string[] args)
         {
             Console.WriteLine("Not implemented, requires direct drive access");
             return 0x00;
         }
 
         // TODO: Implement
-        internal static void ReadSub(byte[] buffer, uint sector, Stream f, byte offset, IntPtr hDevice, ScsiPassThroughDirect SRB)
+        public static void ReadSub(byte[] buffer, uint sector, Stream f, byte offset, IntPtr hDevice, ScsiPassThroughDirect SRB)
         {
             Console.WriteLine("Not implemented, requires direct drive access");
         }
 
         // TODO: Implement
-        internal static void ClearCache(byte[] buffer, Stream f, byte offset, IntPtr hDevice, ScsiPassThroughDirect SRB)
+        public static void ClearCache(byte[] buffer, Stream f, byte offset, IntPtr hDevice, ScsiPassThroughDirect SRB)
         {
             Console.WriteLine("Not implemented, requires direct drive access");
         }

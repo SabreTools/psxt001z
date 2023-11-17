@@ -8,7 +8,7 @@ namespace psxt001z
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/functions.cpp"/>
     public partial class LibCrypt
     {
-        internal static int CalculateEDC(in byte[] src, int srcPtr, int size, int[] edc_lut)
+        public static int CalculateEDC(in byte[] src, int srcPtr, int size, int[] edc_lut)
         {
             int edc = 0;
             while (size-- > 0)
@@ -45,7 +45,7 @@ namespace psxt001z
             buffer[bufferOffset + 2] = IntegerToBinary(frame);
         }
 
-        internal static bool GetEDC(Stream file)
+        public static bool GetEDC(Stream file)
         {
             long currentposition = file.Position;
             file.Seek(30572, SeekOrigin.Begin);
