@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Text;
-using static psxt001z.Common;
 
 namespace psxt001z
 {
-    public class Scramble
+    /// <see href="https://github.com/Dremora/psxt001z/blob/master/scramble.cpp"/>
+    public partial class LibCrypt
     {
-        private static readonly byte[] sync = new byte[12] { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00 };
+        private static readonly byte[] sync = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00];
 
-        public int __main(string[] args)
+        internal static int __main(string[] args)
         {
             if (args.Length < 2 || args.Length > 3)
             {
@@ -44,12 +41,9 @@ namespace psxt001z
             byte[] sector = new byte[sectors];
             if (args.Length == 2)
             {
-                uint hex;
                 for (int i = 0; sector_file.Position < sector_file.Length && i < 3252; i++)
                 {
-                    byte[] buf = new byte[2];
-                    hex = uint.Parse(Encoding.ASCII.GetString(buf), NumberStyles.HexNumber);
-                    sector[i] = (byte)hex;
+                    sector[i] = (byte)sector_file.ReadByte();
                 }
             }
             else
@@ -57,7 +51,7 @@ namespace psxt001z
                 sector_file.Read(sector, 0, sectors);
             }
 
-            int offset = MemSearch(sector, sync, sectors, 12);
+            int offset = memsearch(sector, sync, sectors, 12);
             if (offset == -1)
             {
                 Console.WriteLine("Error searching for sync!");
@@ -66,7 +60,7 @@ namespace psxt001z
 
             Console.WriteLine($"MSF: {sector[offset + 12]:2x}:{sector[offset + 12 + 1]:2x}:{sector[offset + 12 + 2]:2x}");
 
-            int shiftRegister = 0x1;
+            int shiftRegister = 0x01;
             for (int i = 0; i < 3; i++)
             {
                 sector[offset + 12 + i] ^= (byte)(shiftRegister & 0xFF);
@@ -87,10 +81,7 @@ namespace psxt001z
             return 0;
         }
 
-        /// <summary>
-        /// Search for a byte array in another
-        /// </summary>
-        private int MemSearch(in byte[] buf_where, in byte[] buf_search, int buf_where_len, int buf_search_len)
+        internal static int memsearch(in byte[] buf_where, in byte[] buf_search, int buf_where_len, int buf_search_len)
         {
             for (int i = 0; i <= buf_where_len - buf_search_len; i++)
             {

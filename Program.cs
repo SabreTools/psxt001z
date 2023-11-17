@@ -1,166 +1,68 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
-using static psxt001z.Common;
-using static psxt001z.Functions;
+using static psxt001z.LibCrypt;
 
 namespace psxt001z
 {
-    public class Main
+    public class Program
     {
-        public static int main(string[] args)
+        public static int Main(string[] args)
         {
-            Console.WriteLine($"psxt001z by Dremora, {VERSION}");
+            Console.WriteLine($"psxt001z by Dremora (ported by Matt Nadareski), {VERSION}");
             Console.WriteLine();
 
-            if (args == null || args.Length == 0)
+            if (args.Length > 1 && args[0] == "--checksums" || args[0] == "-c")
+                checksums(args);
+            else if (args.Length > 1 && args[0] == "--libcrypt" || args[0] == "-l")
+                libcrypt(args.Length - 2, args + 2);
+            else if (args.Length > 1 && args[0] == "--libcryptdrv")
+                libcryptdrv(args.Skip(2).ToArray());
+            else if (args.Length > 1 && args[0] == "--libcryptdrvfast")
+                libcryptdrvfast(args.Skip(2).ToArray());
+            else if (args.Length > 1 && args[0] == "--xorlibcrypt")
+                xorlibcrypt();
+
+            else if (args.Length == 2)
+                info(args[1]);
+
+            else if (args.Length == 3 && args[0] == "--zektor")
+                zektor(args[2]);
+            else if (args.Length == 3 && args[0] == "--antizektor")
+                antizektor(args[2]);
+            else if (args.Length == 5 && args[0] == "--patch")
+                patch(args);
+            else if (args.Length == 4 && args[0] == "--resize")
+                resize(args);
+            else if (args.Length >= 6 && args.Length <= 10 && args[0] == "--track")
             {
-                Help();
-                return -1;
+                track trackfix = new track(args);
+                while (!trackfix.trackmain()) {;  } 
+                trackfix.done();
             }
-
-            if (args.Length == 1)
-                GetInfo(args[0]);
-
-            string feature = args[0];
-            switch (feature)
-            {
-                case "--checksums":
-                case "-c":
-                    Checksums(args);
-                    break;
-
-                case "--libcrypt":
-                case "-l":
-                    {
-                        if (args.Length != 1 && args.Length != 2)
-                        {
-                            LibCryptHelp();
-                            return 0;
-                        }
-
-                        string subPath = args[0];
-                        string? sbiPath = null;
-                        if (args.Length == 2)
-                            sbiPath = args[1];
-
-                        if (!LibCrypt.LibCryptDetect(subPath, sbiPath))
-                            LibCryptHelp();
-
-                        break;
-                    }
-
-                case "--xorlibcrypt":
-                    LibCrypt.XorLibCrypt();
-                    break;
-
-                case "--zektor":
-                    ClearEDCData(args[1]);
-                    break;
-
-                case "--antizektor":
-                    SetEDCData(args[1]);
-                    break;
-
-                case "--patch":
-                    {
-                        string output = args[1];
-                        string input = args[2];
-                        int skip = 0;
-                        if (args.Length == 4)
-                            skip = int.Parse(args[3]);
-
-                        Patch(output, input, skip);
-                        break;
-                    }
-
-                case "--resize":
-                    {
-                        string input = args[1];
-                        long newsize = long.Parse(args[2]);
-                        Resize(input, newsize);
-                        break;
-                    }
-
-                case "--track":
-                    {
-                        string filename = args[1];
-                        int start = int.Parse(args[2]);
-                        int size = int.Parse(args[3]);
-                        uint crc = uint.Parse(args[4]);
-
-                        bool isRiff = false;
-                        bool? mode = null;
-                        string? output = null;
-                        for (int i = 5; i < args.Length; i++)
-                        {
-                            if (args[i] == "r")
-                                isRiff = true;
-                            else if (args[i][0] == '+')
-                                mode = true;
-                            else if (args[i][1] == '-')
-                                mode = false;
-                            else if (args[i] == "s")
-                                output = args[++i];
-                        }
-
-                        Track trackfix = new Track(filename, start, size, crc, isRiff, mode, output);
-                        while (!trackfix.FindTrack()) ;
-                        trackfix.Done();
-
-                        break;
-                    }
-
-                case "--str":
-                    SplitStr(args);
-                    break;
-
-                case "--str2bs":
-                    StrToBs(args);
-                    break;
-
-                case "--gen":
-                    Generate(args);
-                    break;
-
-                case "--scan":
-                    Info.GetInfo(args[2], false);
-                    break;
-
-                case "--fix":
-                    Info.GetInfo(args[2], true);
-                    break;
-
-                case "--sub":
-                    CreateSubchannel(args[2], args[3]);
-                    break;
-
-                case "--m3s":
-                    M3S(args[2]);
-                    break;
-
-                case "--matrix":
-                    {
-                        Matrix(args);
-                        break;
-                    }
-
-                //case "--libcryptdrv":
-                //    LibCrypt.LibCryptDrive(argv + 2);
-                //    break;
-                //case "--libcryptdrvfast":
-                //    LibCrypt.LibCryptDriveFast(argv + 2);
-                //    break;
-
-                default:
-                    Help();
-                    break;
-            }
-
+            else if (args.Length == 5 && args[0] == "--str")
+                str(args);
+            else if (args.Length == 3 && args[0] == "--str2bs")
+                str2bs(args);
+            else if ((args.Length == 4 || args.Length == 5) && args[0] == "--gen")
+                generate(args);
+            else if (args.Length == 3 && args[0] == "--scan")
+                LibCrypt.info(args[2], false);
+            else if (args.Length == 3 && args[0] == "--fix")
+                LibCrypt.info(args[2], true);
+            else if (args.Length == 4 && args[0] == "--sub")
+                sub(args[2], args[3]);
+            else if (args.Length == 3 && args[0] == "--m3s")
+                m3s(args[2]);
+            else if (args.Length == 6 && args[0] == "--matrix")
+                matrix(args);
+            else
+                help();
             return 1;
         }
 
-        public static void GetInfo(string filename)
+        private static void info(string filename)
         {
             Stream image;
             try
@@ -173,7 +75,7 @@ namespace psxt001z
                 return;
             }
 
-            FileTools file = new FileTools(image);
+            filetools file = new filetools(image);
             long imagesize = image.Length;
 
             Console.WriteLine($"File: {filename}");
@@ -200,7 +102,7 @@ namespace psxt001z
                 Console.WriteLine($"From image:     {realsectors}");
             }
 
-            Console.WriteLine($"EDC in Form 2 sectors: {(GetEDCStatus(image) ? "YES" : "NO")}");
+            Console.WriteLine($"EDC in Form 2 sectors: {(getedc(image) ? "YES" : "NO")}");
 
             string exe = file.exe();
             Console.WriteLine($"ID: {exe.Substring(0, 4)}-{exe.Substring(5)}");
@@ -210,7 +112,7 @@ namespace psxt001z
             image.Seek(0, SeekOrigin.Begin);
 
             byte[] buffer = new byte[2352];
-            CRC32 crc = new CRC32();
+            var crc = new crc32();
             for (uint i = 0; i < 16; i++)
             {
                 image.Read(buffer, 0, 2352);
@@ -218,91 +120,101 @@ namespace psxt001z
             }
 
             uint imagecrc = crc.m_crc32;
-            Console.WriteLine($"{Info.GetEdcType(imagecrc)}");
+            switch (imagecrc)
+            {
+                case 0x11e3052d: Console.WriteLine("Eu EDC"); break;
+                case 0x808c19f6: Console.WriteLine("Eu NoEDC"); break;
+                case 0x70ffa73e: Console.WriteLine("Eu Alt NoEDC"); break;
+                case 0x7f9a25b1: Console.WriteLine("Eu Alt 2 EDC"); break;
+                case 0x783aca30: Console.WriteLine("Jap EDC"); break;
+                case 0xe955d6eb: Console.WriteLine("Jap NoEDC"); break;
+                case 0x9b519a2e: Console.WriteLine("US EDC"); break;
+                case 0x0a3e86f5: Console.WriteLine("US NoEDC"); break;
+                case 0x6773d4db: Console.WriteLine("US Alt NoEDC"); break;
+                default: Console.WriteLine("Unknown, crc %x", imagecrc); break;
+            }
             Console.WriteLine();
 
             image.Close();
             return;
         }
 
-        public static void Help()
+        private static void help()
         {
-            Console.Write("Usage:\n");
-
-            Console.Write("======\n");
-
-            Console.Write("psxt001z.exe image.bin\n");
-            Console.Write("  Display image's info.\n\n");
-
-            Console.Write("psxt001z.exe --scan image.bin\n");
-            Console.Write("  Scan image.bin postgap for errors.\n\n");
-
-            Console.Write("psxt001z.exe --fix image.bin\n");
-            Console.Write("  Scan image.bin postgap for errors and fix them.\n\n");
-
-            //Console.Write("psxt001z.exe --libcryptdrvfast <drive letter>\n");
-            //Console.Write("  Check subchannels for LibCrypt protection using new detection\n  method (disc).\n\n");
-
-            Console.Write("psxt001z.exe --checksums file [start [end]]\n");
-            Console.Write("  Calculate file's checksums (CRC-32, MD5, SHA-1).\n");
-            Console.Write("  [in] file   Specifies the file, which checksums will be calculated.\n");
-            Console.Write("       start  Specifies start position for checksums calculation.\n");
-            Console.Write("       size   Specifies size of block for checksums calculation.\n\n");
-
-            Console.Write("psxt001z.exe --zektor image.bin\n");
-            Console.Write("  Zektor. Replace EDC in Form 2 Mode 2 sectors with zeroes.\n\n");
-
-            Console.Write("psxt001z.exe --antizektor image.bin\n");
-            Console.Write("  Antizektor. Restore EDC in Form 2 Mode 2 sectors.\n\n");
-
-            Console.Write("psxt001z.exe --resize image.bin size\n");
-            Console.Write("  Resize file to requested size.\n\n");
-
-            Console.Write("psxt001z.exe --patch image.bin patch.bin offset\n");
-            Console.Write("  Insert patch.bin into image.bin, skipping given number of bytes from the\n  offset.\n\n");
-
-            Console.Write("psxt001z.exe --track image.bin bytes_to_skip size crc-32 [r] [+/-/f] [s filename]\n");
-            Console.Write("  Try to guess an offset correction of the image dump by searching a track with\n  given size and CRC-32.\n  r - Calculate crc with RIFF header.\n  +/- - Search only for positive or negative offset correction.\n  s - Save track with given filename.\n\n");
-
-            Console.Write("psxt001z.exe --gen file.bin filesize [-r]\n");
-            Console.Write("  Generate a file of the requested size.\n  -r - add RIFF header.\n\n");
-
-            Console.Write("psxt001z.exe --str file.str video.str audio.xa\n");
-            Console.Write("  Deinterleave file.str to video.str and audio.xa.\n\n");
-
-            Console.Write("psxt001z.exe --str2bs file.str\n");
-            Console.Write("  Convert file.str to .bs-files.\n\n");
-
-            Console.Write("psxt001z.exe --sub subchannel.sub size\n");
-            Console.Write("  Generate RAW subchannel with given size (in sectors).\n\n");
-
-            Console.Write("psxt001z.exe --m3s subchannel.m3s\n");
-            Console.Write("  Generate M3S subchannel.\n\n");
-
-            Console.Write("psxt001z.exe --libcrypt <sub> [<sbi>]\n");
-            Console.Write("Usage: psxt001z.exe --libcrypt <sub> [<sbi>]\n");
-            Console.Write("  Check subchannels for LibCrypt protection. (file)\n");
-            Console.Write("  [in]  <sub>   Specifies the subchannel file to be scanned.\n");
-            Console.Write("  [out] <sbi>   Specifies the subchannel file in SBI format where protected\n  sectors will be written.\n\n");
-
-            //Console.Write("psxt001z.exe --libcryptdrv <drive letter>\n");
-            //Console.Write("  Check subchannels for LibCrypt protection (disc).\n\n");
-
+            Console.WriteLine("Usage:");
+            Console.WriteLine("======");
+            Console.WriteLine("psxt001z.exe image.bin");
+            Console.WriteLine("  Display image's info.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --scan image.bin");
+            Console.WriteLine("  Scan image.bin postgap for errors.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --fix image.bin");
+            Console.WriteLine("  Scan image.bin postgap for errors and fix them.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --libcryptdrvfast <drive letter>");
+            Console.WriteLine("  Check subchannels for LibCrypt protection using new detection\n  method (disc).");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --checksums file [start [end]]");
+            Console.WriteLine("  Calculate file's checksums (CRC-32, MD5, SHA-1).");
+            Console.WriteLine("  [in] file   Specifies the file, which checksums will be calculated.");
+            Console.WriteLine("       start  Specifies start position for checksums calculation.");
+            Console.WriteLine("       size   Specifies size of block for checksums calculation.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --zektor image.bin");
+            Console.WriteLine("  Zektor. Replace EDC in Form 2 Mode 2 sectors with zeroes.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --antizektor image.bin");
+            Console.WriteLine("  Antizektor. Restore EDC in Form 2 Mode 2 sectors.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --resize image.bin size");
+            Console.WriteLine("  Resize file to requested size.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --patch image.bin patch.bin offset");
+            Console.WriteLine("  Insert patch.bin into image.bin, skipping given number of bytes from the\n  offset.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --track image.bin bytes_to_skip size crc-32 [r] [+/-/f] [s filename]");
+            Console.WriteLine("  Try to guess an offset correction of the image dump by searching a track with\n  given size and CRC-32.\n  r - Calculate crc with RIFF header.\n  +/- - Search only for positive or negative offset correction.\n  s - Save track with given filename.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --gen file.bin filesize [-r]");
+            Console.WriteLine("  Generate a file of the requested size.\n  -r - add RIFF header.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --str file.str video.str audio.xa");
+            Console.WriteLine("  Deinterleave file.str to video.str and audio.xa.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --str2bs file.str");
+            Console.WriteLine("  Convert file.str to .bs-files.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --sub subchannel.sub size");
+            Console.WriteLine("  Generate RAW subchannel with given size (in sectors).");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --m3s subchannel.m3s");
+            Console.WriteLine("  Generate M3S subchannel.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --libcrypt <sub> [<sbi>]");
+            Console.WriteLine("Usage: psxt001z.exe --libcrypt <sub> [<sbi>]");
+            Console.WriteLine("  Check subchannels for LibCrypt protection. (file)");
+            Console.WriteLine("  [in]  <sub>   Specifies the subchannel file to be scanned.");
+            Console.WriteLine("  [out] <sbi>   Specifies the subchannel file in SBI format where protected\n  sectors will be written.");
+            Console.WriteLine();
+            Console.WriteLine("psxt001z.exe --libcryptdrv <drive letter>");
+            Console.WriteLine("  Check subchannels for LibCrypt protection (disc).");
+            Console.WriteLine();
             Console.Write("Press any key to continue...");
             Console.ReadKey();
         }
 
-        public static bool Patch(string output, string input, int skip = 0)
+        private static bool patch(string[] args)
         {
             Stream f1, f2;
             try
             {
-                f1 = File.Open(output, FileMode.Open, FileAccess.ReadWrite);
-                f2 = File.Open(input, FileMode.Open, FileAccess.Read);
+                f1 = File.Open(args[1], FileMode.Open, FileAccess.ReadWrite);
+                f2 = File.Open(args[2], FileMode.Open, FileAccess.Read);
 
-                f1.Seek(skip, SeekOrigin.Begin);
+                f1.Seek(long.Parse(args[3]), SeekOrigin.Begin);
 
-                Console.WriteLine($"Patching \"{output}\" with \"{input}\", skipping {skip} bytes...");
+                Console.WriteLine($"Patching \"{args[1]}\" with \"{args[2]}\", skipping {args[3]} bytes...");
 
                 int i = 0;
                 while (f1.Position < f1.Length && f2.Position < f2.Length)
@@ -327,12 +239,12 @@ namespace psxt001z
             }
         }
 
-        public static bool Resize(string input, long newsize)
+        private static bool resize(string[] args)
         {
             Stream f;
             try
             {
-                f = File.Open(input, FileMode.Open, FileAccess.ReadWrite);
+                f = File.Open(args[1], FileMode.Open, FileAccess.ReadWrite);
             }
             catch (Exception ex)
             {
@@ -340,46 +252,49 @@ namespace psxt001z
                 return false;
             }
 
-            FileTools image = new FileTools(f);
+            filetools image = new filetools(f);
+            uint newsize = uint.Parse(args[2]);
             switch (image.resize(newsize))
             {
                 case 0:
-                    Console.Write($"File's \"{input}\" size is already {newsize} bytes!");
+                    Console.Write($"File's \"{args[1]}\" size is already {newsize} bytes!");
                     break;
                 case 1:
-                    Console.Write($"File \"{input}\" was successfully resized to {newsize} bytes!");
+                    Console.Write($"File \"{args[1]}\" was successfully resized to {newsize} bytes!");
                     break;
                 case 2:
-                    Console.Write($"File \"{input}\" was successfully truncated to {newsize} bytes!");
+                    Console.Write($"File \"{args[1]}\" was successfully truncated to {newsize} bytes!");
                     break;
             }
 
             return true;
         }
 
-        public static bool Copy(string input, string output, long startbyte, long length)
+        private static bool copy(string[] args)
         {
+            //args[1] - infile
+            //args[2] - outfile
+            //args[3] - startbyte
+            //args[4] - length
+
             Stream infile;
             try
             {
-                infile = File.Open(input, FileMode.Open, FileAccess.Read);
+                infile = File.Open(args[1], FileMode.Open, FileAccess.Read);
             }
             catch
             {
-                Console.WriteLine($"File {input} can't be found.");
+                Console.WriteLine($"File {args[1]} can't be found.");
                 return true;
             }
 
             return true;
-            //HANDLE hfile = CreateFileW(argv[1], GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, 0);
+            //HANDLE hfile = CreateFileW(args[1], GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, 0);
             //SetFilePointer(hfile, newsize, 0, FILE_BEGIN);
             //SetEndOfFile(hfile);
         }
 
-        /// <summary>
-        /// Generate EDC data for a Mode2/2352 image
-        /// </summary>
-        public static void SetEDCData(string filename)
+        private static void antizektor(string filename)
         {
             Stream image = File.Open(filename, FileMode.Open, FileAccess.ReadWrite);
 
@@ -427,7 +342,7 @@ namespace psxt001z
                     image.Read(buffer, 0, 2332);
                     image.Seek(0, SeekOrigin.Current);
 
-                    buffer = BitConverter.GetBytes(CalculateEDC(buffer, 0, 2332, edc_lut));
+                    buffer = BitConverter.GetBytes(calculate_edc(buffer, 0, 2332, edc_lut));
                     image.Write(buffer, 0, 4);
                 }
             }
@@ -437,14 +352,16 @@ namespace psxt001z
             return;
         }
 
-        /// <summary>
-        /// Calculate CRC-32, MD5, and SHA-1 checksums
-        /// </summary>
-        public static byte Checksums(string[] args)
+        private static byte checksums(string[] args)
         {
             if (args.Length < 3 || args.Length > 5)
             {
-                ChecksumsHelp();
+                Console.WriteLine("psxt001z.exe --checksums file [start [end]]");
+                Console.WriteLine("  Calculate file's checksums (CRC-32, MD5, SHA-1).");
+                Console.WriteLine("  [in] file   Specifies the file, which checksums will be calculated.");
+                Console.WriteLine("       start  Specifies start position for checksums calculation.");
+                Console.WriteLine("       size   Specifies size of block for checksums calculation.");
+                Console.WriteLine();
                 return 0;
             }
 
@@ -508,7 +425,7 @@ namespace psxt001z
             byte[] buffer = new byte[1024], digest = new byte[16];
             int len;
 
-            CRC32 crc = new CRC32();
+            var crc = new crc32();
             MD5 md5 = MD5.Create();
             md5.Initialize();
             SHA1 sha1 = SHA1.Create();
@@ -551,10 +468,7 @@ namespace psxt001z
             return 1;
         }
 
-        /// <summary>
-        /// Generate missing RIFF headers
-        /// </summary>
-        public static void Generate(string[] args)
+        private static void generate(string[] args)
         {
             Stream f = File.OpenWrite(args[2]);
             byte[] riff = new byte[44];
@@ -568,10 +482,6 @@ namespace psxt001z
                     riff[1] = 0x49;
                     riff[2] = 0x46;
                     riff[3] = 0x46;
-                    riff[4] = (byte)((size - 8) & 0xFF);
-                    riff[5] = (byte)((size - 8) >> 8);
-                    riff[6] = (byte)((size - 8) >> 16);
-                    riff[7] = (byte)((size - 8) >> 24);
                     riff[8] = 0x57;
                     riff[9] = 0x41;
                     riff[10] = 0x56;
@@ -604,11 +514,8 @@ namespace psxt001z
                     riff[37] = 0x61;
                     riff[38] = 0x74;
                     riff[39] = 0x61;
-                    riff[40] = (byte)((size - 44) & 0xFF);
-                    riff[41] = (byte)((size - 44) >> 8);
-                    riff[42] = (byte)((size - 44) >> 16);
-                    riff[43] = (byte)((size - 44) >> 24);
-
+                    Array.Copy(BitConverter.GetBytes(size - 8), 0, riff, 4, 4);
+                    Array.Copy(BitConverter.GetBytes(size - 44), 0, riff, 40, 4);
                     f.Write(riff, 0, 44);
                 }
             }
@@ -621,13 +528,9 @@ namespace psxt001z
             return;
         }
 
-        /// <summary>
-        /// Create a generic M3S subchannel file for a sector count
-        /// </summary>
-        /// <param name="filename"></param>
-        public static void M3S(string filename)
+        private static void m3s(string filename)
         {
-            byte[] buffer = { 0x41, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            byte[] buffer = [0x41, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
 
             Stream subchannel = File.Open(filename, FileMode.Create, FileAccess.Write);
             Console.Write($"File: {filename}");
@@ -658,7 +561,7 @@ namespace psxt001z
                 buffer[8] = itob(sec);
                 buffer[9] = itob(frame);
 
-                ushort crc = CRC16.Calculate(buffer, 0, 10);
+                ushort crc = crc16(buffer, 0, 10);
                 subchannel.Write(buffer, 0, 10);
                 subchannel.WriteByte((byte)(crc >> 8));
                 subchannel.WriteByte((byte)(crc & 0xFF));
@@ -672,17 +575,12 @@ namespace psxt001z
             }
 
             Console.WriteLine("Creating M3S: 100%");
-
             subchannel.Close();
-
             Console.WriteLine("Done!");
             return;
         }
 
-        /// <summary>
-        /// Matrix 3 input files into a single output
-        /// </summary>
-        public static void Matrix(string[] args)
+        private static void matrix(string[] args)
         {
             Stream f1 = File.Open(args[2], FileMode.Open, FileAccess.ReadWrite);
             Stream f2 = File.Open(args[3], FileMode.Open, FileAccess.ReadWrite);
@@ -728,25 +626,22 @@ namespace psxt001z
             return;
         }
 
-        /// <summary>
-        /// Split a STR-formatted image into audio and video
-        /// </summary>
-        public static void SplitStr(string[] argv)
+        private static void str(string[] args)
         {
-            Stream str = File.OpenRead(argv[2]);
+            Stream str = File.OpenRead(args[2]);
             long filesize = str.Length;
             if (filesize % 2336 != 0)
             {
-                Console.Write($"File '{argv[2]}' is not in STR format!");
+                Console.Write($"File '{args[2]}' is not in STR format!");
                 str.Close();
                 return;
             }
 
             long sectors = filesize / 2336;
-            Stream video = File.OpenWrite(argv[3]);
+            Stream video = File.OpenWrite(args[3]);
 
             sectors = filesize / 2336;
-            Stream audio = File.OpenWrite(argv[4]);
+            Stream audio = File.OpenWrite(args[4]);
 
             for (long i = 0; i < sectors; i++)
             {
@@ -780,43 +675,24 @@ namespace psxt001z
             return;
         }
 
-        /// <summary>
-        /// Split a STR-formatted file into BS-formatted blocks
-        /// </summary>
-        public static void StrToBs(string[] argv)
+        private static void str2bs(string[] args)
         {
             byte[] buffer = new byte[2016];
-            int filenamesize = argv[2].Length;
-            string directory = $"{argv[2]}-bs";
+            string directory = $"{args[2]}-bs";
 
-            Stream str = File.OpenRead(argv[2]);
+            Stream str = File.OpenRead(args[2]);
             long filesize = str.Length;
             if (filesize % 2048 != 0)
             {
-                Console.Write($"File '{argv[2]}; is not in STR format!");
+                Console.Write($"File '{args[2]}; is not in STR format!");
                 str.Close();
                 return;
             }
-
-            /*wchar_t newfilename[2048];
-			for (u8 f = 0; f < strlen(filename); f++) {
-				newfilename[f] = filename[f];
-				*((char *)newfilename +f*2 +1) = 0;
-			}*/
 
             Directory.CreateDirectory(directory);
 
             long numblocks = filesize / 2048;
             Stream bs = File.OpenWrite(directory + "\\000001.bs");
-
-            // TODO: Figure out what these values were for
-            // ushort a = 1;
-            // ushort b = 0;
-            // ushort c = 0;
-
-            byte[] ax = { 0, 0 };
-            byte[] bx = { 0, 0 };
-            byte[] cx = { 0, 0 };
 
             str.Seek(32, SeekOrigin.Current);
             str.Read(buffer, 0, 2016);
@@ -854,10 +730,7 @@ namespace psxt001z
             return;
         }
 
-        /// <summary>
-        /// Create a generic SUB subchannel file for a sector count
-        /// </summary>
-        public static void CreateSubchannel(string filename, string strsectors)
+        private static void sub(string filename, string strsectors)
         {
             long sectors = long.Parse(strsectors);
             if (sectors == 0 || sectors == -1)
@@ -909,7 +782,7 @@ namespace psxt001z
                 buffer[8] = itob(sec);
                 buffer[9] = itob(frame);
 
-                ushort crc = CRC16.Calculate(buffer, 0, 10);
+                ushort crc = crc16(buffer, 0, 10);
 
                 for (int i = 0; i < 12; i++)
                 {
@@ -935,19 +808,14 @@ namespace psxt001z
             }
 
             Console.WriteLine("Creating: 100%");
-
             subchannel.Close();
-
             Console.WriteLine("Done!");
             return;
         }
 
-        /// <summary>
-        /// Clear EDC data from a Mode2/2352 image
-        /// </summary>
-        public static void ClearEDCData(string filename)
+        private static void zektor(string filename)
         {
-            byte[] zero = { 0x00, 0x00, 0x00, 0x00 };
+            byte[] zero = [0x00, 0x00, 0x00, 0x00];
 
             Stream image = File.Open(filename, FileMode.Open, FileAccess.ReadWrite);
             long filesize = image.Length;
@@ -978,28 +846,5 @@ namespace psxt001z
             Console.WriteLine("Done!");
             return;
         }
-
-        #region Help
-
-        private static void ChecksumsHelp()
-        {
-            Console.WriteLine("psxt001z.exe --checksums file [start [end]]");
-            Console.WriteLine("  Calculate file's checksums (CRC-32, MD5, SHA-1).");
-            Console.WriteLine("  [in] file   Specifies the file, which checksums will be calculated.");
-            Console.WriteLine("       start  Specifies start position for checksums calculation.");
-            Console.WriteLine("       size   Specifies size of block for checksums calculation.");
-            Console.WriteLine();
-        }
-
-        private static void LibCryptHelp()
-        {
-            Console.WriteLine("LibCrypt detector\nUsage: psxt001z.exe --libcrypt <sub> [<sbi>]");
-            Console.WriteLine("  Check subchannel for LibCrypt protection.");
-            Console.WriteLine("  [in]  <sub>  Specifies the subchannel file to be scanned.");
-            Console.WriteLine("  [out] <sbi>  Specifies the subchannel file in SBI format where protected\n               sectors will be written.");
-            Console.WriteLine();
-        }
-
-        #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace psxt001z
 {
-    public static class Common
+    /// <see href="https://github.com/Dremora/psxt001z/blob/master/common.h"/>
+    public partial class LibCrypt
     {
         public const int ZERO = 0;
 

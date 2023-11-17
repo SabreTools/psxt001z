@@ -1,16 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using static psxt001z.Common;
+using SabreTools.IO;
 
 namespace psxt001z
 {
-    internal static class Functions
+    /// <see href="https://github.com/Dremora/psxt001z/blob/master/functions.cpp"/>
+    public partial class LibCrypt
     {
-        public static int CalculateEDC(in byte[] src, int srcPtr, int size, int[] edc_lut)
+        public static int calculate_edc(in byte[] src, int srcPtr, int size, int[] edc_lut)
         {
             int edc = 0;
-            while (size-- != 0)
+            while (size-- > 0)
             {
                 edc = (edc >> 8) ^ edc_lut[(edc ^ src[srcPtr++]) & 0xFF];
             }
@@ -18,7 +19,7 @@ namespace psxt001z
             return edc;
         }
 
-        public static bool ZeroCompare(byte[] buffer, int bufferPtr, int bsize)
+        public static bool zerocmp(byte[] buffer, int bufferPtr, int bsize)
         {
             for (int i = 0; i < bsize; i++)
             {
@@ -29,7 +30,7 @@ namespace psxt001z
             return true;
         }
 
-        public static void MSF(long lba, byte[] buffer, int bufferOffset)
+        public static void msf(long lba, byte[] buffer, int bufferOffset)
         {
             lba += 150;
 
@@ -42,25 +43,18 @@ namespace psxt001z
             buffer[bufferOffset] = itob(min);
             buffer[bufferOffset + 1] = itob(sec);
             buffer[bufferOffset + 2] = itob(frame);
-
-            return;
         }
 
-        public static bool GetEDCStatus(Stream file)
+        public static bool getedc(Stream file)
         {
             long currentposition = file.Position;
-
             file.Seek(30572, SeekOrigin.Begin);
-
-            byte[] buffer = new byte[4];
-            file.Read(buffer, 0, 4);
-
+            uint buffer = file.ReadUInt32();
             file.Seek(currentposition, SeekOrigin.Begin);
-
-            return BitConverter.ToInt32(buffer, 0) == 0;
+            return buffer == 0;
         }
 
-        public static byte[] ExecutableName(Stream file)
+        public static byte[] exe(Stream file)
         {
             byte[] buffer = new byte[20];
             byte[] exename = new byte[20];
@@ -75,9 +69,8 @@ namespace psxt001z
             }
 
             file.Seek(-32, SeekOrigin.Current);
-            byte[] lba = new byte[4];
-            file.Read(lba, 0, 4);
-            file.Seek((2352 * BitConverter.ToInt32(lba, 0)) + 29, SeekOrigin.Begin);
+            uint lba = file.ReadUInt32();
+            file.Seek((2352 * lba) + 29, SeekOrigin.Begin);
             file.Read(buffer, 0, 6);
             buffer[6] = 0;
             while (Encoding.ASCII.GetString(buffer) != "cdrom:")

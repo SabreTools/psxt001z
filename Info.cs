@@ -1,30 +1,27 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using static psxt001z.Functions;
+using SabreTools.IO;
 
 namespace psxt001z
 {
-    public class Info
+    /// <see href="https://github.com/Dremora/psxt001z/blob/master/info.cpp"/>
+    public partial class LibCrypt
     {
-        #region Constants
+        private static readonly byte[] edc_form_2 = [0x3F, 0x13, 0xB0, 0xBE];
 
-        private static readonly byte[] edc_form_2 = { 0x3F, 0x13, 0xB0, 0xBE };
+        private static readonly byte[] syncheader = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00];
 
-        private static readonly byte[] syncheader = { 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private static readonly byte[] subheader = [0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x20, 0x00];
 
-        private static readonly byte[] subheader = { 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x20, 0x00 };
-
-        #endregion
-
-        #region Functions
-
-        public static int GetInfo(string filename, bool fix)
+        public static int info(string filename, bool fix)
         {
-            // Variables
+            #region Variables
+
             bool errors = false;
             byte[] buffer = new byte[2352], buffer2 = new byte[2352];
-            int mode = 15; // synñheader[15];
+
+            #endregion
 
             #region Opening image
 
@@ -72,9 +69,9 @@ namespace psxt001z
 
             if (sectorsize == 2352)
             {
-                image.Seek(0xF, SeekOrigin.Begin);
-                mode = image.ReadByte();
-                if (mode != 1 && mode != 2)
+                image.Seek(0x0F, SeekOrigin.Begin);
+                syncheader[15] = (byte)image.ReadByte();
+                if (syncheader[15] != 1 && syncheader[15] != 2)
                 {
                     Console.WriteLine($"{filename}: unknown mode!");
                     return 1;
@@ -82,22 +79,20 @@ namespace psxt001z
             }
             else
             {
-                mode = -1;
+                syncheader[15] = 0xFF;
             }
 
             #endregion
 
             #region Size
 
-            image.Seek(sectorsize * 16 + ((mode == 2) ? 24 : ((mode == 1) ? 16 : 0)) + 0x50, SeekOrigin.Begin);
+            image.Seek(sectorsize * 16 + ((syncheader[15] == 2) ? 24 : ((syncheader[15] == 1) ? 16 : 0)) + 0x50, SeekOrigin.Begin);
 
             // ISO size
-            byte[] buf = new byte[4];
-            image.Read(buf, 0, 4);
-            int realsectors = BitConverter.ToInt32(buf, 0);
-
+            int realsectors = image.ReadInt32();
             image.Seek(0, SeekOrigin.Begin);
             int realsize = realsectors * sectorsize;
+
             if (sectors == realsectors)
             {
                 Console.WriteLine($"Size (bytes):   {size} (OK)");
@@ -115,14 +110,14 @@ namespace psxt001z
 
             #region Mode
 
-            if (mode > 0)
-                Console.WriteLine($"Mode: {mode}");
+            if (syncheader[15] > 0)
+                Console.WriteLine($"Mode: {syncheader[15]}");
 
-            if (mode == 2)
+            if (syncheader[15] == 2)
             {
                 #region EDC in Form 2
 
-                bool imageedc = GetEDCStatus(image);
+                bool imageedc = getedc(image);
                 Console.WriteLine($"EDC in Form 2 sectors: {(imageedc ? "YES" : "NO")}");
 
                 #endregion
@@ -132,7 +127,7 @@ namespace psxt001z
                 string systemArea = "System area: ";
                 image.Seek(0, SeekOrigin.Begin);
 
-                CRC32 crc = new CRC32();
+                var crc = new crc32();
                 for (int i = 0; i < 16; i++)
                 {
                     image.Read(buffer, 0, 2352);
@@ -140,8 +135,19 @@ namespace psxt001z
                 }
 
                 uint imagecrc = crc.m_crc32;
-                systemArea += GetEdcType(imagecrc);
-
+                systemArea += imagecrc switch
+                {
+                    0x11e3052d => "Eu EDC",
+                    0x808c19f6 => "Eu NoEDC",
+                    0x70ffa73e => "Eu Alt NoEDC",
+                    0x7f9a25b1 => "Eu Alt 2 EDC",
+                    0x783aca30 => "Jap EDC",
+                    0xe955d6eb => "Jap NoEDC",
+                    0x9b519a2e => "US EDC",
+                    0x0a3e86f5 => "US NoEDC",
+                    0x6773d4db => "US Alt NoEDC",
+                    _ => $"Unknown, crc {imagecrc:8x}",
+                };
                 Console.WriteLine(systemArea);
 
                 #endregion
@@ -152,7 +158,7 @@ namespace psxt001z
                 image.Read(buffer, 0, 2336);
 
                 string postgap = "Postgap type: Form ";
-                if ((buffer[2] >> 5 & 0x1) != 0)
+                if ((buffer[2] >> 5 & 0x01) != 0)
                 {
                     postgap += "2";
                     if (buffer.Take(8).SequenceEqual(subheader))
@@ -160,12 +166,12 @@ namespace psxt001z
                     else
                         postgap += ", non-zero subheader";
 
-                    if (ZeroCompare(buffer, 8, 2324))
+                    if (zerocmp(buffer, 8, 2324))
                         postgap += ", zero data";
                     else
                         postgap += ", non-zero data";
 
-                    if (ZeroCompare(buffer, 2332, 4))
+                    if (zerocmp(buffer, 2332, 4))
                         postgap += ", no EDC";
                     else
                         postgap += ", EDC";
@@ -173,12 +179,12 @@ namespace psxt001z
                 else
                 {
                     postgap += "1";
-                    if (ZeroCompare(buffer, 0, 8))
+                    if (zerocmp(buffer, 0, 8))
                         postgap += ", zero subheader";
                     else
                         postgap += ", non-zero subheader";
 
-                    if (ZeroCompare(buffer, 8, 2328))
+                    if (zerocmp(buffer, 8, 2328))
                         postgap += ", zero data";
                     else
                         postgap += ", non-zero data";
@@ -190,7 +196,7 @@ namespace psxt001z
                 #endregion
             }
 
-            if (mode < 0)
+            if (syncheader[15] < 0)
                 return 0;
 
             for (long sector = sectors - 150; sector < sectors; sector++)
@@ -199,10 +205,11 @@ namespace psxt001z
                 image.Seek(sector * sectorsize, SeekOrigin.Begin);
                 image.Read(buffer, 0, sectorsize);
 
-                // Sync
                 string sectorInfo = string.Empty;
 
-                MSF(sector, syncheader, 12);
+                #region Sync
+
+                msf(sector, syncheader, 12);
                 if (!syncheader.SequenceEqual(buffer.Take(16)))
                 {
                     sectorInfo += $"Sector {sector}: Sync/Header";
@@ -215,8 +222,11 @@ namespace psxt001z
                     }
                 }
 
-                // Mode 2
-                if (mode == 2 && buffer.Skip(16).Take(2336).SequenceEqual(buffer2))
+                #endregion
+
+                #region Mode 2
+
+                if (syncheader[15] == 2 && buffer.Skip(16).Take(2336).SequenceEqual(buffer2))
                 {
                     if (bad)
                     {
@@ -224,7 +234,7 @@ namespace psxt001z
                     }
                     else
                     {
-                        sectorInfo = $"Sector {sector}: Subheader/Data/EDC/ECC";
+                        sectorInfo += $"\nSector {sector}: Subheader/Data/EDC/ECC";
                         bad = true;
                     }
 
@@ -235,6 +245,8 @@ namespace psxt001z
                         sectorInfo += " (fixed)";
                     }
                 }
+
+                #endregion
 
                 Console.WriteLine(sectorInfo);
 
@@ -256,38 +268,5 @@ namespace psxt001z
 
             return 0;
         }
-
-        #endregion
-
-        #region Utilities
-
-        internal static string GetEdcType(uint imageCrc)
-        {
-            switch (imageCrc)
-            {
-                case 0x11e3052d:
-                    return "Eu EDC";
-                case 0x808c19f6:
-                    return "Eu NoEDC";
-                case 0x70ffa73e:
-                    return "Eu Alt NoEDC";
-                case 0x7f9a25b1:
-                    return "Eu Alt 2 EDC";
-                case 0x783aca30:
-                    return "Jap EDC";
-                case 0xe955d6eb:
-                    return "Jap NoEDC";
-                case 0x9b519a2e:
-                    return "US EDC";
-                case 0x0a3e86f5:
-                    return "US NoEDC";
-                case 0x6773d4db:
-                    return "US Alt NoEDC";
-                default:
-                    return $"Unknown, crc {imageCrc:8x}";
-            }
-        }
-
-        #endregion
     }
 }
