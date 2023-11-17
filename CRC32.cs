@@ -1,27 +1,17 @@
 ﻿namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/main.cpp"/>
-    internal class crc32
+    internal class CRC32
     {
-        #region Constants
-
         private const uint CRC_POLY = 0xEDB88320;
 
         private const uint CRC_MASK = 0xD202EF8D;
 
-        #endregion
+        private uint[] table = new uint[256];
 
-        #region Properties
+        public uint Hash { get; private set; }
 
-        protected uint[] table { get; private set; } = new uint[256];
-
-        public uint m_crc32 { get; private set; }
-
-        #endregion
-
-        #region Constructor
-
-        public crc32()
+        public CRC32()
         {
             for (uint i = 0; i < 256; i++)
             {
@@ -34,25 +24,19 @@
                 table[i] = r;
             }
 
-            m_crc32 = 0;
+            Hash = 0;
         }
 
-        #endregion
-
-        #region Functions
-
-        public void ProcessCRC(byte[] pData, int pDataPtr, int nLen)
+        public void Calculate(byte[] pData, int pDataPtr, int nLen)
         {
-            uint crc = m_crc32;
+            uint crc = Hash;
             while (nLen-- > 0)
             {
                 crc = table[(byte)(crc ^ pData[pDataPtr++])] ^ crc >> 8;
                 crc ^= CRC_MASK;
             }
 
-            m_crc32 = crc;
+            Hash = crc;
         }
-
-        #endregion
     }
 }

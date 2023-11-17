@@ -8,7 +8,7 @@ namespace psxt001z
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/functions.cpp"/>
     public partial class LibCrypt
     {
-        public static int calculate_edc(in byte[] src, int srcPtr, int size, int[] edc_lut)
+        internal static int CalculateEDC(in byte[] src, int srcPtr, int size, int[] edc_lut)
         {
             int edc = 0;
             while (size-- > 0)
@@ -19,7 +19,7 @@ namespace psxt001z
             return edc;
         }
 
-        public static bool zerocmp(byte[] buffer, int bufferPtr, int bsize)
+        internal static bool ZeroCompare(byte[] buffer, int bufferPtr, int bsize)
         {
             for (int i = 0; i < bsize; i++)
             {
@@ -30,7 +30,7 @@ namespace psxt001z
             return true;
         }
 
-        public static void msf(long lba, byte[] buffer, int bufferOffset)
+        internal static void MSF(long lba, byte[] buffer, int bufferOffset)
         {
             lba += 150;
 
@@ -45,7 +45,7 @@ namespace psxt001z
             buffer[bufferOffset + 2] = itob(frame);
         }
 
-        public static bool getedc(Stream file)
+        internal static bool GetEDC(Stream file)
         {
             long currentposition = file.Position;
             file.Seek(30572, SeekOrigin.Begin);
@@ -54,7 +54,7 @@ namespace psxt001z
             return buffer == 0;
         }
 
-        public static byte[] exe(Stream file)
+        internal static byte[] GetExecutableName(Stream file)
         {
             byte[] buffer = new byte[20];
             byte[] exename = new byte[20];

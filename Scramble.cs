@@ -81,7 +81,7 @@ namespace psxt001z
             return 0;
         }
 
-        internal static int memsearch(in byte[] buf_where, in byte[] buf_search, int buf_where_len, int buf_search_len)
+        private static int memsearch(in byte[] buf_where, in byte[] buf_search, int buf_where_len, int buf_search_len)
         {
             for (int i = 0; i <= buf_where_len - buf_search_len; i++)
             {

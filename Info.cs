@@ -14,7 +14,7 @@ namespace psxt001z
 
         private static readonly byte[] subheader = [0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x20, 0x00];
 
-        public static int info(string filename, bool fix)
+        public static bool Info(string filename, bool fix)
         {
             #region Variables
 
@@ -34,7 +34,7 @@ namespace psxt001z
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
-                return 1;
+                return false;
             }
 
             long size = image.Length;
@@ -58,7 +58,7 @@ namespace psxt001z
             if (size % sectorsize != 0)
             {
                 Console.WriteLine($"{filename}: not ModeX/{sectorsize} image!");
-                return 1;
+                return false;
             }
 
             long sectors = size / sectorsize;
@@ -74,7 +74,7 @@ namespace psxt001z
                 if (syncheader[15] != 1 && syncheader[15] != 2)
                 {
                     Console.WriteLine($"{filename}: unknown mode!");
-                    return 1;
+                    return false;
                 }
             }
             else
@@ -117,7 +117,7 @@ namespace psxt001z
             {
                 #region EDC in Form 2
 
-                bool imageedc = getedc(image);
+                bool imageedc = GetEDC(image);
                 Console.WriteLine($"EDC in Form 2 sectors: {(imageedc ? "YES" : "NO")}");
 
                 #endregion
@@ -127,14 +127,14 @@ namespace psxt001z
                 string systemArea = "System area: ";
                 image.Seek(0, SeekOrigin.Begin);
 
-                var crc = new crc32();
+                var crc = new CRC32();
                 for (int i = 0; i < 16; i++)
                 {
                     image.Read(buffer, 0, 2352);
-                    crc.ProcessCRC(buffer, 0, 2352);
+                    crc.Calculate(buffer, 0, 2352);
                 }
 
-                uint imagecrc = crc.m_crc32;
+                uint imagecrc = crc.Hash;
                 systemArea += imagecrc switch
                 {
                     0x11e3052d => "Eu EDC",
@@ -166,12 +166,12 @@ namespace psxt001z
                     else
                         postgap += ", non-zero subheader";
 
-                    if (zerocmp(buffer, 8, 2324))
+                    if (ZeroCompare(buffer, 8, 2324))
                         postgap += ", zero data";
                     else
                         postgap += ", non-zero data";
 
-                    if (zerocmp(buffer, 2332, 4))
+                    if (ZeroCompare(buffer, 2332, 4))
                         postgap += ", no EDC";
                     else
                         postgap += ", EDC";
@@ -179,12 +179,12 @@ namespace psxt001z
                 else
                 {
                     postgap += "1";
-                    if (zerocmp(buffer, 0, 8))
+                    if (ZeroCompare(buffer, 0, 8))
                         postgap += ", zero subheader";
                     else
                         postgap += ", non-zero subheader";
 
-                    if (zerocmp(buffer, 8, 2328))
+                    if (ZeroCompare(buffer, 8, 2328))
                         postgap += ", zero data";
                     else
                         postgap += ", non-zero data";
@@ -197,7 +197,7 @@ namespace psxt001z
             }
 
             if (syncheader[15] < 0)
-                return 0;
+                return true;
 
             for (long sector = sectors - 150; sector < sectors; sector++)
             {
@@ -209,7 +209,7 @@ namespace psxt001z
 
                 #region Sync
 
-                msf(sector, syncheader, 12);
+                MSF(sector, syncheader, 12);
                 if (!syncheader.SequenceEqual(buffer.Take(16)))
                 {
                     sectorInfo += $"Sector {sector}: Sync/Header";
@@ -266,7 +266,7 @@ namespace psxt001z
 
             #endregion
 
-            return 0;
+            return true;
         }
     }
 }

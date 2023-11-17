@@ -35,7 +35,7 @@ namespace psxt001z
             Console.WriteLine("Not implemented, requires direct drive access");
         }
 
-        internal static bool matrix(byte[] buffer, byte[] buffer2, byte[] buffer3, byte[] buffer4, uint length)
+        public static bool Matrix(byte[] buffer, byte[] buffer2, byte[] buffer3, byte[] buffer4, uint length)
         {
             for (int i = 0; i < length; i++)
             {
@@ -61,7 +61,7 @@ namespace psxt001z
             return true;
         }
 
-        internal static void deinterleave(byte[] buffer)
+        public static void Deinterleave(byte[] buffer)
         {
             byte[] buffertmp = new byte[12];
             for (int i = 0; i < 12; i++)
@@ -80,22 +80,28 @@ namespace psxt001z
             return;
         }
 
-        internal static bool libcrypt(string subPath, string? sbiPath)
+        public static bool DetectLibCrypt(string[] args)
         {
-            if (string.IsNullOrWhiteSpace(subPath) || !File.Exists(subPath))
+            if (args.Length != 1 && args.Length != 2)
+            {
+                Console.WriteLine("LibCrypt detector\nUsage: psxt001z.exe --libcrypt <sub> [<sbi>]");
+                Console.WriteLine("  Check subchannel for LibCrypt protection.");
+                Console.WriteLine("  [in]  <sub>  Specifies the subchannel file to be scanned.");
+                Console.WriteLine("  [out] <sbi>  Specifies the subchannel file in SBI format where protected\n               sectors will be written.\n");
                 return false;
+            }
 
             // Variables
             byte[] buffer = new byte[16], sub = new byte[16];//, pregap = 0;
             uint sector, psectors = 0, tpos = 0;
 
             // Opening .sub
-            Stream subfile = File.OpenRead(subPath);
+            Stream subfile = File.OpenRead(args[0]);
 
             // Checking extension
-            if (Path.GetExtension(subPath).TrimStart('.').ToLowerInvariant() != "sub")
+            if (Path.GetExtension(args[0]).TrimStart('.').ToLowerInvariant() != "sub")
             {
-                Console.WriteLine($"{subPath}: unknown file extension");
+                Console.WriteLine($"{args[0]}: unknown file extension");
                 return false;
             }
 
@@ -109,9 +115,9 @@ namespace psxt001z
 
             // sbi
             Stream? sbi = null;
-            if (sbiPath != null)
+            if (args.Length > 1 && args[1] != null)
             {
-                sbi = File.OpenWrite(sbiPath);
+                sbi = File.OpenWrite(args[1]);
                 sbi.Write(Encoding.ASCII.GetBytes("SBI\0"), 0, 4);
             }
 
@@ -156,7 +162,7 @@ namespace psxt001z
                 sub[9] = itob((byte)(sector % 75));
 
                 // CRC-16 [10-11]
-                ushort crc = crc16(sub, 0, 10);
+                ushort crc = CRC16.Calculate(sub, 0, 10);
                 sub[10] = (byte)(crc >> 8);
                 sub[11] = (byte)(crc & 0xFF);
 
@@ -164,7 +170,7 @@ namespace psxt001z
                 //if (buffer[10] != sub[10] || buffer[11] != sub[11] || buffer[3] != sub[3] || buffer[7] != sub[7] || buffer[4] != sub[4] || buffer[8] != sub[8] || buffer[5] != sub[5] || buffer[9] != sub[9]) {
                 if (!buffer.Take(6).SequenceEqual(sub.Take(6)) || !buffer.Skip(7).Take(5).SequenceEqual(sub.Skip(7).Take(5)))
                 {
-                    Console.WriteLine($"MSF: {sub[7]:2x}:{sub[8]:2x}:{sub[9]:2x} Q-Data: {buffer[0]:2x}{buffer[1]:2x}{buffer[2]:2x} {buffer[3]:2x}:{buffer[4]:2x}:{buffer[5]:2x} {buffer[6]:2x} {buffer[7]:2x}:{buffer[8]:2x}:{buffer[9]:2x} {buffer[10]:2x}{buffer[11]:2x}  xor {crc ^ ((buffer[10] << 8) + buffer[11]):4x} {crc16(buffer, 0, 10) ^ ((buffer[10] << 8) + buffer[11]):4x}");
+                    Console.WriteLine($"MSF: {sub[7]:2x}:{sub[8]:2x}:{sub[9]:2x} Q-Data: {buffer[0]:2x}{buffer[1]:2x}{buffer[2]:2x} {buffer[3]:2x}:{buffer[4]:2x}:{buffer[5]:2x} {buffer[6]:2x} {buffer[7]:2x}:{buffer[8]:2x}:{buffer[9]:2x} {buffer[10]:2x}{buffer[11]:2x}  xor {crc ^ ((buffer[10] << 8) + buffer[11]):4x} {CRC16.Calculate(buffer, 0, 10) ^ ((buffer[10] << 8) + buffer[11]):4x}");
                     //Console.WriteLine("\nMSF: %02x:%02x:%02x Q-Data: %02x%02x%02x %02x:%02x:%02x %02x %02x:%02x:%02x %02x%02x", sub[7], sub[8], sub[9], sub[0], sub[1], sub[2], sub[3], sub[4], sub[5], sub[6], sub[7], sub[8], sub[9], sub[10], sub[11]);
 
                     if (buffer[3] != sub[3] && buffer[7] != sub[7] && buffer[4] == sub[4] && buffer[8] == sub[8] && buffer[5] == sub[5] && buffer[9] == sub[9])
@@ -176,7 +182,7 @@ namespace psxt001z
                     else
                         Console.WriteLine(" ?");
 
-                    Console.WriteLine("\n");
+                    Console.WriteLine("");
                     psectors++;
                     if (sbi != null)
                     {
@@ -192,7 +198,7 @@ namespace psxt001z
             return true;
         }
 
-        internal static int xorlibcrypt()
+        public static int XorLibCrypt()
         {
             sbyte b;
             byte d;
@@ -213,7 +219,7 @@ namespace psxt001z
                 sub[7] = itob((byte)((lc_addresses[i] + 150) / 60 / 75));
                 sub[8] = itob((byte)(((lc_addresses[i] + 150) / 75) % 60));
                 sub[9] = itob((byte)((lc_addresses[i] + 150) % 75));
-                crc = crc16(sub, 0, 10);
+                crc = CRC16.Calculate(sub, 0, 10);
                 sub[10] = (byte)(crc >> 8);
                 sub[11] = (byte)(crc & 0xFF);
 
@@ -244,111 +250,5 @@ namespace psxt001z
 
             return 1;
         }
-
-        #region OLD
-
-        public static bool CheckSubfile(string subFilePath)
-        {
-            // Check the file exists first
-            if (!File.Exists(subFilePath))
-                return false;
-
-            // Check the extension is a subfile
-            string ext = Path.GetExtension(subFilePath).TrimStart('.').ToLowerInvariant();
-            if (ext != "sub")
-                return false;
-
-            // Open and check the subfile for LibCrypt
-            try
-            {
-                using (FileStream subfile = File.OpenRead(subFilePath))
-                {
-                    return CheckSubfile(subfile);
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public static bool CheckSubfile(Stream subfile)
-        {
-            // Check the length is valid for subfiles
-            long size = subfile.Length;
-            if (size % 96 != 0)
-                return false;
-
-            // Persistent values
-            byte[] buffer = new byte[16];
-            byte[] sub = new byte[16];
-            int tpos = 0;
-            int modifiedSectors = 0;
-
-            // Check each sector for modifications
-            for (uint sector = 150; sector < ((size / 96) + 150); sector++)
-            {
-                subfile.Seek(12, SeekOrigin.Current);
-                if (subfile.Read(buffer, 0, 12) == 0)
-                    return modifiedSectors != 0;
-
-                subfile.Seek(72, SeekOrigin.Current);
-
-                // New track
-                if ((btoi(buffer[1]) == (btoi(sub[1]) + 1)) && (buffer[2] == 0 || buffer[2] == 1))
-                {
-                    Array.Copy(buffer, sub, 6);
-                    tpos = ((btoi((byte)(buffer[3] * 60)) + btoi(buffer[4])) * 75) + btoi(buffer[5]);
-                }
-
-                // New index
-                else if (btoi(buffer[2]) == (btoi(sub[2]) + 1) && buffer[1] == sub[1])
-                {
-                    Array.Copy(buffer, 2, sub, 2, 4);
-                    tpos = ((btoi((byte)(buffer[3] * 60)) + btoi(buffer[4])) * 75) + btoi(buffer[5]);
-                }
-
-                // MSF1 [3-5]
-                else
-                {
-                    if (sub[2] == 0)
-                        tpos--;
-                    else
-                        tpos++;
-
-                    sub[3] = itob((byte)(tpos / 60 / 75));
-                    sub[4] = itob((byte)((tpos / 75) % 60));
-                    sub[5] = itob((byte)(tpos % 75));
-                }
-
-                // MSF2 [7-9]
-                sub[7] = itob((byte)(sector / 60 / 75));
-                sub[8] = itob((byte)((sector / 75) % 60));
-                sub[9] = itob((byte)(sector % 75));
-
-                // CRC-16 [10-11]
-                ushort crc = crc16(sub, 0, 10);
-                byte[] crcBytes = BitConverter.GetBytes(crc);
-                sub[10] = crcBytes[0];
-                sub[11] = crcBytes[1];
-
-                // If any byte (except position 6) is different, it's a modified sector
-                for (int i = 0; i < 12; i++)
-                {
-                    if (i == 6)
-                        continue;
-
-                    if (buffer[i] != sub[i])
-                    {
-                        modifiedSectors++;
-                        break;
-                    }
-                }
-            }
-
-            return modifiedSectors != 0;
-        }
-
-        #endregion
     }
 }

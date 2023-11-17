@@ -13,56 +13,100 @@ namespace psxt001z
             Console.WriteLine($"psxt001z by Dremora (ported by Matt Nadareski), {VERSION}");
             Console.WriteLine();
 
-            if (args.Length > 1 && args[0] == "--checksums" || args[0] == "-c")
-                checksums(args);
-            else if (args.Length > 1 && args[0] == "--libcrypt" || args[0] == "-l")
-                libcrypt(args.Length - 2, args + 2);
-            else if (args.Length > 1 && args[0] == "--libcryptdrv")
-                libcryptdrv(args.Skip(2).ToArray());
-            else if (args.Length > 1 && args[0] == "--libcryptdrvfast")
-                libcryptdrvfast(args.Skip(2).ToArray());
-            else if (args.Length > 1 && args[0] == "--xorlibcrypt")
-                xorlibcrypt();
-
-            else if (args.Length == 2)
-                info(args[1]);
-
-            else if (args.Length == 3 && args[0] == "--zektor")
-                zektor(args[2]);
-            else if (args.Length == 3 && args[0] == "--antizektor")
-                antizektor(args[2]);
-            else if (args.Length == 5 && args[0] == "--patch")
-                patch(args);
-            else if (args.Length == 4 && args[0] == "--resize")
-                resize(args);
-            else if (args.Length >= 6 && args.Length <= 10 && args[0] == "--track")
+            if (args.Length == 0)
             {
-                track trackfix = new track(args);
-                while (!trackfix.trackmain()) {;  } 
-                trackfix.done();
+                Help();
+                return 1;
             }
-            else if (args.Length == 5 && args[0] == "--str")
-                str(args);
-            else if (args.Length == 3 && args[0] == "--str2bs")
-                str2bs(args);
-            else if ((args.Length == 4 || args.Length == 5) && args[0] == "--gen")
-                generate(args);
-            else if (args.Length == 3 && args[0] == "--scan")
-                LibCrypt.info(args[2], false);
-            else if (args.Length == 3 && args[0] == "--fix")
-                LibCrypt.info(args[2], true);
-            else if (args.Length == 4 && args[0] == "--sub")
-                sub(args[2], args[3]);
-            else if (args.Length == 3 && args[0] == "--m3s")
-                m3s(args[2]);
-            else if (args.Length == 6 && args[0] == "--matrix")
-                matrix(args);
-            else
-                help();
+
+            switch (args[0])
+            {
+                case "--checksums" or "-c":
+                    Checksums(args);
+                    break;
+
+                case "--libcrypt" or "-l":
+                    DetectLibCrypt(args.Skip(2).ToArray());
+                    break;
+
+                case "--libcryptdrv":
+                    libcryptdrv(args.Skip(2).ToArray());
+                    break;
+
+                case "--libcryptdrvfast":
+                    libcryptdrvfast(args.Skip(2).ToArray());
+                    break;
+
+                case "--xorlibcrypt":
+                    XorLibCrypt();
+                    break;
+
+                case "--zektor" when args.Length == 2:
+                    Zektor(args[1]);
+                    break;
+
+                case "--antizektor" when args.Length == 2:
+                    AntiZektor(args[1]);
+                    break;
+
+                case "--patch" when args.Length == 4:
+                    Patch(args);
+                    break;
+
+                case "--resize" when args.Length == 3:
+                    Resize(args);
+                    break;
+
+                case "--track" when args.Length >= 5 && args.Length <= 9:
+                    Track trackfix = new Track(args);
+                    while (!trackfix.GuessOffsetCorrection()) { }
+                    trackfix.Done();
+                    break;
+
+                case "--str" when args.Length == 4:
+                    Str(args);
+                    break;
+
+                case "--str2bs" when args.Length == 2:
+                    Str2Bs(args);
+                    break;
+
+                case "--gen" when args.Length == 3 || args.Length == 4:
+                    Generate(args);
+                    break;
+
+                case "--scan" when args.Length == 2:
+                    LibCrypt.Info(args[1], false);
+                    break;
+
+                case "--fix" when args.Length == 2:
+                    LibCrypt.Info(args[1], true);
+                    break;
+
+                case "--sub" when args.Length == 3:
+                    Sub(args[1], args[2]);
+                    break;
+
+                case "--m3s" when args.Length == 2:
+                    M3S(args[1]);
+                    break;
+
+                case "--matrix" when args.Length == 5:
+                    Matrix(args);
+                    break;
+
+                default:
+                    if (args.Length == 1)
+                        Info(args[1]);
+                    else
+                        Help();
+                    break;
+            }
+
             return 1;
         }
 
-        private static void info(string filename)
+        private static void Info(string filename)
         {
             Stream image;
             try
@@ -75,7 +119,7 @@ namespace psxt001z
                 return;
             }
 
-            filetools file = new filetools(image);
+            FileTools file = new FileTools(image);
             long imagesize = image.Length;
 
             Console.WriteLine($"File: {filename}");
@@ -86,7 +130,7 @@ namespace psxt001z
                 return;
             }
 
-            long realsectors = file.imagesize();
+            long realsectors = file.GetImageSize();
             long imagesectors = imagesize / 2352;
             long realsize = realsectors * 2352;
             if (imagesize == realsize)
@@ -102,24 +146,24 @@ namespace psxt001z
                 Console.WriteLine($"From image:     {realsectors}");
             }
 
-            Console.WriteLine($"EDC in Form 2 sectors: {(getedc(image) ? "YES" : "NO")}");
+            Console.WriteLine($"EDC in Form 2 sectors: {(GetEDC(image) ? "YES" : "NO")}");
 
-            string exe = file.exe();
+            string exe = file.GetExecutableName();
             Console.WriteLine($"ID: {exe.Substring(0, 4)}-{exe.Substring(5)}");
-            Console.WriteLine($"Date: {file.date()}");
+            Console.WriteLine($"Date: {file.GetDate()}");
 
             Console.Write("System area: ");
             image.Seek(0, SeekOrigin.Begin);
 
             byte[] buffer = new byte[2352];
-            var crc = new crc32();
+            var crc = new CRC32();
             for (uint i = 0; i < 16; i++)
             {
                 image.Read(buffer, 0, 2352);
-                crc.ProcessCRC(buffer, 0, 2352);
+                crc.Calculate(buffer, 0, 2352);
             }
 
-            uint imagecrc = crc.m_crc32;
+            uint imagecrc = crc.Hash;
             switch (imagecrc)
             {
                 case 0x11e3052d: Console.WriteLine("Eu EDC"); break;
@@ -139,7 +183,7 @@ namespace psxt001z
             return;
         }
 
-        private static void help()
+        private static void Help()
         {
             Console.WriteLine("Usage:");
             Console.WriteLine("======");
@@ -204,7 +248,7 @@ namespace psxt001z
             Console.ReadKey();
         }
 
-        private static bool patch(string[] args)
+        private static bool Patch(string[] args)
         {
             Stream f1, f2;
             try
@@ -239,7 +283,7 @@ namespace psxt001z
             }
         }
 
-        private static bool resize(string[] args)
+        private static bool Resize(string[] args)
         {
             Stream f;
             try
@@ -252,9 +296,9 @@ namespace psxt001z
                 return false;
             }
 
-            filetools image = new filetools(f);
+            FileTools image = new FileTools(f);
             uint newsize = uint.Parse(args[2]);
-            switch (image.resize(newsize))
+            switch (image.Resize(newsize))
             {
                 case 0:
                     Console.Write($"File's \"{args[1]}\" size is already {newsize} bytes!");
@@ -270,7 +314,7 @@ namespace psxt001z
             return true;
         }
 
-        private static bool copy(string[] args)
+        private static bool Copy(string[] args)
         {
             //args[1] - infile
             //args[2] - outfile
@@ -294,7 +338,7 @@ namespace psxt001z
             //SetEndOfFile(hfile);
         }
 
-        private static void antizektor(string filename)
+        private static void AntiZektor(string filename)
         {
             Stream image = File.Open(filename, FileMode.Open, FileAccess.ReadWrite);
 
@@ -342,7 +386,7 @@ namespace psxt001z
                     image.Read(buffer, 0, 2332);
                     image.Seek(0, SeekOrigin.Current);
 
-                    buffer = BitConverter.GetBytes(calculate_edc(buffer, 0, 2332, edc_lut));
+                    buffer = BitConverter.GetBytes(CalculateEDC(buffer, 0, 2332, edc_lut));
                     image.Write(buffer, 0, 4);
                 }
             }
@@ -352,7 +396,7 @@ namespace psxt001z
             return;
         }
 
-        private static byte checksums(string[] args)
+        private static byte Checksums(string[] args)
         {
             if (args.Length < 3 || args.Length > 5)
             {
@@ -425,7 +469,7 @@ namespace psxt001z
             byte[] buffer = new byte[1024], digest = new byte[16];
             int len;
 
-            var crc = new crc32();
+            var crc = new CRC32();
             MD5 md5 = MD5.Create();
             md5.Initialize();
             SHA1 sha1 = SHA1.Create();
@@ -454,13 +498,13 @@ namespace psxt001z
 
                 md5.TransformBlock(buffer, 0, len, null, 0);
                 sha1.TransformBlock(buffer, 0, len, null, 0);
-                crc.ProcessCRC(buffer, 0, len);
+                crc.Calculate(buffer, 0, len);
             }
 
             md5.TransformFinalBlock(digest, 0, digest.Length);
             sha1.TransformFinalBlock(Message_Digest, 0, Message_Digest.Length);
 
-            Console.Write($"\rCRC-32: {crc.m_crc32:8x}                      \n");
+            Console.Write($"\rCRC-32: {crc.Hash:8x}                      \n");
             Console.Write($"MD5:    {BitConverter.ToString(md5.Hash!).Replace("-", string.Empty)}");
             Console.WriteLine($"MD5:    {BitConverter.ToString(md5.Hash!).Replace("-", string.Empty)}");
             Console.WriteLine($"SHA-1:  {BitConverter.ToString(sha1.Hash!).Replace("-", string.Empty)}");
@@ -468,7 +512,7 @@ namespace psxt001z
             return 1;
         }
 
-        private static void generate(string[] args)
+        private static void Generate(string[] args)
         {
             Stream f = File.OpenWrite(args[2]);
             byte[] riff = new byte[44];
@@ -528,7 +572,7 @@ namespace psxt001z
             return;
         }
 
-        private static void m3s(string filename)
+        private static void M3S(string filename)
         {
             byte[] buffer = [0x41, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
 
@@ -561,7 +605,7 @@ namespace psxt001z
                 buffer[8] = itob(sec);
                 buffer[9] = itob(frame);
 
-                ushort crc = crc16(buffer, 0, 10);
+                ushort crc = CRC16.Calculate(buffer, 0, 10);
                 subchannel.Write(buffer, 0, 10);
                 subchannel.WriteByte((byte)(crc >> 8));
                 subchannel.WriteByte((byte)(crc & 0xFF));
@@ -580,7 +624,7 @@ namespace psxt001z
             return;
         }
 
-        private static void matrix(string[] args)
+        private static void Matrix(string[] args)
         {
             Stream f1 = File.Open(args[2], FileMode.Open, FileAccess.ReadWrite);
             Stream f2 = File.Open(args[3], FileMode.Open, FileAccess.ReadWrite);
@@ -626,7 +670,7 @@ namespace psxt001z
             return;
         }
 
-        private static void str(string[] args)
+        private static void Str(string[] args)
         {
             Stream str = File.OpenRead(args[2]);
             long filesize = str.Length;
@@ -675,7 +719,7 @@ namespace psxt001z
             return;
         }
 
-        private static void str2bs(string[] args)
+        private static void Str2Bs(string[] args)
         {
             byte[] buffer = new byte[2016];
             string directory = $"{args[2]}-bs";
@@ -730,7 +774,7 @@ namespace psxt001z
             return;
         }
 
-        private static void sub(string filename, string strsectors)
+        private static void Sub(string filename, string strsectors)
         {
             long sectors = long.Parse(strsectors);
             if (sectors == 0 || sectors == -1)
@@ -782,7 +826,7 @@ namespace psxt001z
                 buffer[8] = itob(sec);
                 buffer[9] = itob(frame);
 
-                ushort crc = crc16(buffer, 0, 10);
+                ushort crc = CRC16.Calculate(buffer, 0, 10);
 
                 for (int i = 0; i < 12; i++)
                 {
@@ -813,7 +857,7 @@ namespace psxt001z
             return;
         }
 
-        private static void zektor(string filename)
+        private static void Zektor(string filename)
         {
             byte[] zero = [0x00, 0x00, 0x00, 0x00];
 
