@@ -1,4 +1,6 @@
-﻿namespace psxt001z
+﻿using System;
+
+namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/common.h"/>
     public partial class LibCrypt
@@ -16,5 +18,17 @@
         /// Byte to BCD
         /// </summary>
         internal static byte IntegerToBinary(byte i) => (byte)(i / 10 * 16 + i % 10);
+
+        /// <summary>
+        /// Get a santized hex string from an input byte array
+        /// </summary>
+        internal static string GetHexString(byte[] bytes) =>
+            BitConverter.ToString(bytes).Replace("-", string.Empty);
+
+        /// <summary>
+        /// Get a santized hex string from an input byte array
+        /// </summary>
+        internal static string GetHexString(byte[] bytes, int startIndex, int length) =>
+            BitConverter.ToString(bytes, startIndex, length).Replace("-", string.Empty);
     }
 }

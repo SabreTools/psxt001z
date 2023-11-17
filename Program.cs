@@ -504,10 +504,9 @@ namespace psxt001z
             md5.TransformFinalBlock(digest, 0, digest.Length);
             sha1.TransformFinalBlock(Message_Digest, 0, Message_Digest.Length);
 
-            Console.Write($"\rCRC-32: {crc.Hash:8x}                      \n");
-            Console.Write($"MD5:    {BitConverter.ToString(md5.Hash!).Replace("-", string.Empty)}");
-            Console.WriteLine($"MD5:    {BitConverter.ToString(md5.Hash!).Replace("-", string.Empty)}");
-            Console.WriteLine($"SHA-1:  {BitConverter.ToString(sha1.Hash!).Replace("-", string.Empty)}");
+            Console.WriteLine($"\rCRC-32: {crc.Hash:8x}                      \n");
+            Console.WriteLine($"MD5:    {GetHexString(md5.Hash!)}");
+            Console.WriteLine($"SHA-1:  {GetHexString(sha1.Hash!)}");
             Console.WriteLine();
             return 1;
         }

@@ -170,7 +170,7 @@ namespace psxt001z
                 //if (buffer[10] != sub[10] || buffer[11] != sub[11] || buffer[3] != sub[3] || buffer[7] != sub[7] || buffer[4] != sub[4] || buffer[8] != sub[8] || buffer[5] != sub[5] || buffer[9] != sub[9]) {
                 if (!buffer.Take(6).SequenceEqual(sub.Take(6)) || !buffer.Skip(7).Take(5).SequenceEqual(sub.Skip(7).Take(5)))
                 {
-                    Console.WriteLine($"MSF: {BitConverter.ToString(sub, 7, 3).Replace("-", string.Empty)} Q-Data: {BitConverter.ToString(buffer, 0, 3).Replace("-", string.Empty)} {BitConverter.ToString(buffer, 3, 3).Replace("-", string.Empty)} {BitConverter.ToString(buffer, 6, 1)} {BitConverter.ToString(buffer, 7, 1)}:{BitConverter.ToString(buffer, 8, 1)}:{BitConverter.ToString(buffer, 9, 1)} {BitConverter.ToString(buffer, 10, 2).Replace("-", string.Empty)} xor {crc ^ ((buffer[10] << 8) + buffer[11]):4x} {CRC16.Calculate(buffer, 0, 10) ^ ((buffer[10] << 8) + buffer[11]):4x}");
+                    Console.WriteLine($"MSF: {GetHexString(sub, 7, 3)} Q-Data: {GetHexString(buffer, 0, 3)} {GetHexString(buffer, 3, 3)} {GetHexString(buffer, 6, 1)} {GetHexString(buffer, 7, 1)}:{GetHexString(buffer, 8, 1)}:{GetHexString(buffer, 9, 1)} {GetHexString(buffer, 10, 2)} xor {crc ^ ((buffer[10] << 8) + buffer[11]):4x} {CRC16.Calculate(buffer, 0, 10) ^ ((buffer[10] << 8) + buffer[11]):4x}");
                     //Console.WriteLine("\nMSF: %02x:%02x:%02x Q-Data: %02x%02x%02x %02x:%02x:%02x %02x %02x:%02x:%02x %02x%02x", sub[7], sub[8], sub[9], sub[0], sub[1], sub[2], sub[3], sub[4], sub[5], sub[6], sub[7], sub[8], sub[9], sub[10], sub[11]);
 
                     if (buffer[3] != sub[3] && buffer[7] != sub[7] && buffer[4] == sub[4] && buffer[8] == sub[8] && buffer[5] == sub[5] && buffer[9] == sub[9])
@@ -223,9 +223,9 @@ namespace psxt001z
                 sub[10] = (byte)(crc >> 8);
                 sub[11] = (byte)(crc & 0xFF);
 
-                Console.WriteLine($"{lc_addresses[i]} {BitConverter.ToString(sub, 7, 3).Replace("-", string.Empty)}");
-                Console.WriteLine($" {BitConverter.ToString(sub, 0, 10).Replace("-", string.Empty)} {BitConverter.ToString(sub, 10, 2).Replace("-", string.Empty)}");
-                Console.WriteLine($" {BitConverter.ToString(lc1_sectors_contents, i * 12, 10).Replace("-", string.Empty)} {BitConverter.ToString(lc1_sectors_contents, i * 12 + 10, 2).Replace("-", string.Empty)}");
+                Console.WriteLine($"{lc_addresses[i]} {GetHexString(sub, 7, 3)}");
+                Console.WriteLine($" {GetHexString(sub, 0, 10)} {GetHexString(sub, 10, 2)}");
+                Console.WriteLine($" {GetHexString(lc1_sectors_contents, i * 12, 10)} {GetHexString(lc1_sectors_contents, i * 12 + 10, 2)}");
 
                 d = 0;
 
