@@ -7,7 +7,7 @@
 
         private const uint CRC_MASK = 0xD202EF8D;
 
-        private uint[] table = new uint[256];
+        private readonly uint[] table = new uint[256];
 
         public uint Hash { get; private set; }
 

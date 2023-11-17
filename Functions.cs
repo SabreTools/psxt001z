@@ -40,9 +40,9 @@ namespace psxt001z
             byte sec = (byte)Math.Floor(secdbl);
             byte frame = (byte)(lba - (min * 60 * 75) - (sec * 75));
 
-            buffer[bufferOffset] = itob(min);
-            buffer[bufferOffset + 1] = itob(sec);
-            buffer[bufferOffset + 2] = itob(frame);
+            buffer[bufferOffset] = IntegerToBinary(min);
+            buffer[bufferOffset + 1] = IntegerToBinary(sec);
+            buffer[bufferOffset + 2] = IntegerToBinary(frame);
         }
 
         internal static bool GetEDC(Stream file)

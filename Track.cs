@@ -7,29 +7,29 @@ namespace psxt001z
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/main.cpp"/>
     internal class Track
     {
-        private Stream _file;
+        private readonly Stream _file;
 
-        private string? _path;
+        private readonly string? _path;
 
-        private uint _start;
+        private readonly uint _start;
 
-        private uint _crc;
+        private readonly uint _crc;
 
-        private uint _size;
+        private readonly uint _size;
 
-        private byte[] _riff = new byte[44];
+        private readonly byte[] _riff = new byte[44];
 
-        private bool _isRiff;
+        private readonly bool _isRiff;
 
         private byte _mode;
 
-        private bool _smallFile;
+        private readonly bool _smallFile;
 
-        private byte[]? _fileContents;
+        private readonly byte[]? _fileContents;
 
-        private bool _saveTrack;
+        private readonly bool _saveTrack;
 
-        //private long[] _fastOffset = new long[77];
+        //private readonly long[] _fastOffset = new long[77];
 
         private long _offset;
 
@@ -183,7 +183,7 @@ namespace psxt001z
 
         private bool Calculate()
         {
-            CRC32 calc = new CRC32();
+            var calc = new CRC32();
             if (_smallFile && _fileContents != null)
             {
                 if (_isRiff)

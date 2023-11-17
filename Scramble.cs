@@ -51,7 +51,7 @@ namespace psxt001z
                 sector_file.Read(sector, 0, sectors);
             }
 
-            int offset = memsearch(sector, sync, sectors, 12);
+            int offset = MemSearch(sector, sync, sectors, 12);
             if (offset == -1)
             {
                 Console.WriteLine("Error searching for sync!");
@@ -71,7 +71,7 @@ namespace psxt001z
                 }
             }
 
-            int start_sector = (btoi(sector[offset + 12]) * 60 + btoi(sector[offset + 13])) * 75 + btoi(sector[offset + 14]) - 150;
+            int start_sector = (BinaryToInteger(sector[offset + 12]) * 60 + BinaryToInteger(sector[offset + 13])) * 75 + BinaryToInteger(sector[offset + 14]) - 150;
 
             Console.WriteLine($"MSF: {sector[offset + 12]:2x}:{sector[offset + 12 + 1]:2x}:{sector[offset + 12 + 2]:2x}");
 
@@ -81,7 +81,7 @@ namespace psxt001z
             return 0;
         }
 
-        private static int memsearch(in byte[] buf_where, in byte[] buf_search, int buf_where_len, int buf_search_len)
+        private static int MemSearch(in byte[] buf_where, in byte[] buf_search, int buf_where_len, int buf_search_len)
         {
             for (int i = 0; i <= buf_where_len - buf_search_len; i++)
             {

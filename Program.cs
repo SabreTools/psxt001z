@@ -30,11 +30,11 @@ namespace psxt001z
                     break;
 
                 case "--libcryptdrv":
-                    libcryptdrv(args.Skip(2).ToArray());
+                    DetectLibCryptDrive(args.Skip(2).ToArray());
                     break;
 
                 case "--libcryptdrvfast":
-                    libcryptdrvfast(args.Skip(2).ToArray());
+                    DetectLibCryptDriveFast(args.Skip(2).ToArray());
                     break;
 
                 case "--xorlibcrypt":
@@ -58,7 +58,7 @@ namespace psxt001z
                     break;
 
                 case "--track" when args.Length >= 5 && args.Length <= 9:
-                    Track trackfix = new Track(args);
+                    var trackfix = new Track(args);
                     while (!trackfix.GuessOffsetCorrection()) { }
                     trackfix.Done();
                     break;
@@ -119,7 +119,7 @@ namespace psxt001z
                 return;
             }
 
-            FileTools file = new FileTools(image);
+            var file = new FileTools(image);
             long imagesize = image.Length;
 
             Console.WriteLine($"File: {filename}");
@@ -175,7 +175,7 @@ namespace psxt001z
                 case 0x9b519a2e: Console.WriteLine("US EDC"); break;
                 case 0x0a3e86f5: Console.WriteLine("US NoEDC"); break;
                 case 0x6773d4db: Console.WriteLine("US Alt NoEDC"); break;
-                default: Console.WriteLine("Unknown, crc %x", imagecrc); break;
+                default: Console.WriteLine($"Unknown, crc {imagecrc:x}"); break;
             }
             Console.WriteLine();
 
@@ -296,7 +296,7 @@ namespace psxt001z
                 return false;
             }
 
-            FileTools image = new FileTools(f);
+            var image = new FileTools(f);
             uint newsize = uint.Parse(args[2]);
             switch (image.Resize(newsize))
             {
@@ -589,9 +589,9 @@ namespace psxt001z
 
                 byte frame = (byte)(sector - (min * 60 * 75) - (sec * 75));
 
-                buffer[3] = itob(min);
-                buffer[4] = itob(sec);
-                buffer[5] = itob(frame);
+                buffer[3] = IntegerToBinary(min);
+                buffer[4] = IntegerToBinary(sec);
+                buffer[5] = IntegerToBinary(frame);
 
                 mindbl = sector2 / 60 / 75;
                 min = (byte)Math.Floor(mindbl);
@@ -601,9 +601,9 @@ namespace psxt001z
 
                 frame = (byte)(sector2 - (min * 60 * 75) - (sec * 75));
 
-                buffer[7] = itob(min);
-                buffer[8] = itob(sec);
-                buffer[9] = itob(frame);
+                buffer[7] = IntegerToBinary(min);
+                buffer[8] = IntegerToBinary(sec);
+                buffer[9] = IntegerToBinary(frame);
 
                 ushort crc = CRC16.Calculate(buffer, 0, 10);
                 subchannel.Write(buffer, 0, 10);
@@ -810,9 +810,9 @@ namespace psxt001z
 
                 byte frame = (byte)(sector - (min * 60 * 75) - (sec * 75));
 
-                buffer[3] = itob(min);
-                buffer[4] = itob(sec);
-                buffer[5] = itob(frame);
+                buffer[3] = IntegerToBinary(min);
+                buffer[4] = IntegerToBinary(sec);
+                buffer[5] = IntegerToBinary(frame);
 
                 mindbl = sector2 / 60 / 75;
                 min = (byte)Math.Floor(mindbl);
@@ -822,9 +822,9 @@ namespace psxt001z
 
                 frame = (byte)(sector2 - (min * 60 * 75) - (sec * 75));
 
-                buffer[7] = itob(min);
-                buffer[8] = itob(sec);
-                buffer[9] = itob(frame);
+                buffer[7] = IntegerToBinary(min);
+                buffer[8] = IntegerToBinary(sec);
+                buffer[9] = IntegerToBinary(frame);
 
                 ushort crc = CRC16.Calculate(buffer, 0, 10);
 
@@ -842,7 +842,7 @@ namespace psxt001z
                     subchannel.WriteByte(0x00);
                 }
 
-                Console.Write("Creating: %02u%%\r", (100 * sector) / sectors);
+                Console.Write($"Creating: {(100 * sector) / sectors}%\r");
             }
 
             subchannel.Seek(0, SeekOrigin.Begin);

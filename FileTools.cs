@@ -5,18 +5,13 @@ using System.Text;
 namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/main.cpp"/>
-    internal class FileTools
+    internal class FileTools(Stream file)
     {
-        private Stream _file;
+        private readonly Stream _file = file;
 
-        private byte[] _executableName = new byte[20];
+        private readonly byte[] _executableName = new byte[20];
 
-        private byte[] _dateValue = new byte[11];
-
-        public FileTools(Stream file)
-        {
-            _file = file;
-        }
+        private readonly byte[] _dateValue = new byte[11];
 
         public long Size() => _file.Length;
 
