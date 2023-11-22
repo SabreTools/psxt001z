@@ -225,7 +225,7 @@ namespace psxt001z
             }
             else
             {
-                if (_saveTrack && !string.IsNullOrWhiteSpace(_path))
+                if (_saveTrack && !string.IsNullOrEmpty(_path))
                 {
                     byte[] buffer = new byte[1];
                     Stream f2 = File.OpenWrite(_path);
