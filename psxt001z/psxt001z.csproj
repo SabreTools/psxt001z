@@ -9,7 +9,7 @@
     <Nullable>enable</Nullable>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Version>0.21-beta2</Version>
+    <Version>0.21-beta3</Version>
 
     <!-- Package Properties -->
     <Authors>Kirill Korolyov, Matt Nadareski</Authors>
