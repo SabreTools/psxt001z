@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using SabreTools.IO;
+using SabreTools.IO.Extensions;
 
 namespace psxt001z
 {
