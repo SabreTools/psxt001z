@@ -159,7 +159,7 @@ namespace psxt001z
             var crc = new CRC32();
             for (uint i = 0; i < 16; i++)
             {
-                image.Read(buffer, 0, 2352);
+                _ = image.Read(buffer, 0, 2352);
                 crc.Calculate(buffer, 0, 2352);
             }
 
@@ -264,7 +264,7 @@ namespace psxt001z
                 while (f1.Position < f1.Length && f2.Position < f2.Length)
                 {
                     byte[] buffer = new byte[1];
-                    f2.Read(buffer, 0, 1);
+                    _ = f2.Read(buffer, 0, 1);
                     f1.Write(buffer, 0, 1);
                     i++;
                 }
@@ -377,13 +377,13 @@ namespace psxt001z
                 image.Seek(sector * 2352 + 18, SeekOrigin.Begin);
 
                 byte[] z = new byte[1];
-                image.Read(z, 0, 1);
+                _ = image.Read(z, 0, 1);
                 if ((z[0] >> 5 & 0x1) != 0)
                 {
                     image.Seek(-3, SeekOrigin.Current);
 
                     byte[] buffer = new byte[2332];
-                    image.Read(buffer, 0, 2332);
+                    _ = image.Read(buffer, 0, 2332);
                     image.Seek(0, SeekOrigin.Current);
 
                     buffer = BitConverter.GetBytes(CalculateEDC(buffer, 0, 2332, edc_lut));
@@ -634,13 +634,13 @@ namespace psxt001z
             for (long i = 0; i < subsize; i++)
             {
                 byte[] r1 = new byte[1];
-                f1.Read(r1, 0, 1);
+                _ = f1.Read(r1, 0, 1);
 
                 byte[] r2 = new byte[1];
-                f2.Read(r2, 0, 1);
+                _ = f2.Read(r2, 0, 1);
 
                 byte[] r3 = new byte[1];
-                f3.Read(r3, 0, 1);
+                _ = f3.Read(r3, 0, 1);
 
                 if (r1 == r2)
                 {
@@ -691,19 +691,19 @@ namespace psxt001z
                 str.Seek(2, SeekOrigin.Current);
 
                 byte[] ctrlbyte = new byte[1];
-                str.Read(ctrlbyte, 0, 1);
+                _ = str.Read(ctrlbyte, 0, 1);
 
                 byte[] buffer = new byte[2336];
                 if ((ctrlbyte[0] >> 5 & 0x1) != 0)
                 {
                     str.Seek(-3, SeekOrigin.Current);
-                    str.Read(buffer, 0, 2336);
+                    _ = str.Read(buffer, 0, 2336);
                     audio.Write(buffer, 0, 2336);
                 }
                 else
                 {
                     str.Seek(5, SeekOrigin.Current);
-                    str.Read(buffer, 0, 2048);
+                    _ = str.Read(buffer, 0, 2048);
                     video.Write(buffer, 0, 2048);
                     str.Seek(280, SeekOrigin.Current);
                 }
@@ -738,7 +738,7 @@ namespace psxt001z
             Stream bs = File.OpenWrite(directory + "\\000001.bs");
 
             str.Seek(32, SeekOrigin.Current);
-            str.Read(buffer, 0, 2016);
+            _ = str.Read(buffer, 0, 2016);
             Console.WriteLine(directory);
 
             bs.Write(buffer, 0, 2016);
@@ -750,7 +750,7 @@ namespace psxt001z
                 str.Seek(1, SeekOrigin.Current);
 
                 byte[] byt = new byte[1];
-                str.Read(byt, 0, 1);
+                _ = str.Read(byt, 0, 1);
 
                 if (byt[0] == 0)
                 {
@@ -760,7 +760,7 @@ namespace psxt001z
                 }
 
                 str.Seek(30, SeekOrigin.Current);
-                str.Read(buffer, 0, 2016);
+                _ = str.Read(buffer, 0, 2016);
                 bs.Write(buffer, 0, 2016);
             }
 
@@ -877,7 +877,7 @@ namespace psxt001z
                 image.Seek(sector * 2352 + 18, SeekOrigin.Begin);
 
                 byte[] z = new byte[1];
-                image.Read(z, 0, 1);
+                _ = image.Read(z, 0, 1);
                 if ((z[0] >> 5 & 0x1) != 0)
                 {
                     image.Seek(2329, SeekOrigin.Current);

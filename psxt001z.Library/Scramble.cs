@@ -48,7 +48,7 @@ namespace psxt001z
             }
             else
             {
-                sector_file.Read(sector, 0, sectors);
+                _ = sector_file.Read(sector, 0, sectors);
             }
 
             int offset = MemSearch(sector, sync, sectors, 12);

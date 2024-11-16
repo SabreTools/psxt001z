@@ -44,7 +44,7 @@ namespace psxt001z
 
             #region Type
 
-            image.Read(buffer, 0, 12);
+            _ = image.Read(buffer, 0, 12);
 
             int sectorsize;
             if (buffer.Take(12).SequenceEqual(syncheader.Take(12)))
@@ -130,7 +130,7 @@ namespace psxt001z
                 var crc = new CRC32();
                 for (int i = 0; i < 16; i++)
                 {
-                    image.Read(buffer, 0, 2352);
+                    _ = image.Read(buffer, 0, 2352);
                     crc.Calculate(buffer, 0, 2352);
                 }
 
@@ -155,7 +155,7 @@ namespace psxt001z
                 #region Postgap
 
                 image.Seek((sectors - 150) * sectorsize + 16, SeekOrigin.Begin);
-                image.Read(buffer, 0, 2336);
+                _ = image.Read(buffer, 0, 2336);
 
                 string postgap = "Postgap type: Form ";
                 if ((buffer[2] >> 5 & 0x01) != 0)
@@ -203,7 +203,7 @@ namespace psxt001z
             {
                 bool bad = false;
                 image.Seek(sector * sectorsize, SeekOrigin.Begin);
-                image.Read(buffer, 0, sectorsize);
+                _ = image.Read(buffer, 0, sectorsize);
 
                 string sectorInfo = string.Empty;
 

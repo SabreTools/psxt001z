@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using SabreTools.IO.Extensions;
 
 namespace psxt001z
 {
@@ -22,37 +23,33 @@ namespace psxt001z
             string filename = string.Empty;
             while (filename != "SYSTEM.CNF")
             {
-                byte[] buf = new byte[10];
-                _file.Read(buf, 0, 10);
+                byte[] buf = _file.ReadBytes(10);
                 filename = Encoding.ASCII.GetString(buf);
                 _file.Seek(-9, SeekOrigin.Current);
             }
 
-            byte[] buffer = new byte[20];
-
             _file.Seek(-32, SeekOrigin.Current);
-            _file.Read(buffer, 0, 4);
-            uint lba = BitConverter.ToUInt32(buffer, 0);
+            uint lba = _file.ReadUInt32();
 
             _file.Seek((2352 * lba) + 29, SeekOrigin.Begin);
-            _file.Read(buffer, 0, 6);
+            byte[] buffer = _file.ReadBytes(6);
 
             string iniLine = Encoding.ASCII.GetString(buffer);
             while (iniLine != "cdrom:")
             {
                 _file.Seek(-5, SeekOrigin.Current);
-                _file.Read(buffer, 0, 6);
+                buffer = _file.ReadBytes(6);
                 iniLine = Encoding.ASCII.GetString(buffer);
             }
 
-            _file.Read(buffer, 0, 1);
+            buffer = _file.ReadBytes(1);
             if (buffer[0] != '\\')
                 _file.Seek(-1, SeekOrigin.Current);
 
             int i = -1;
             do
             {
-                _file.Read(buffer, ++i, 1);
+                _ = _file.Read(buffer, ++i, 1);
             } while (buffer[i] != ';');
 
             for (long a = 0; a < i; a++)
@@ -65,20 +62,19 @@ namespace psxt001z
 
         public string GetDate()
         {
-            byte[] buffer = new byte[12], datenofrmt = new byte[3];
-
             _file.Seek(51744, SeekOrigin.Begin);
 
+            byte[] buffer = new byte[12];
             do
             {
-                _file.Read(buffer, 0, 11);
+                _ = _file.Read(buffer, 0, 11);
                 buffer[11] = 0;
                 _file.Seek(-10, SeekOrigin.Current);
             } while (Encoding.ASCII.GetString(_executableName) != Encoding.ASCII.GetString(buffer));
 
             _file.Seek(-16, SeekOrigin.Current);
-            _file.Read(datenofrmt, 0, 3);
 
+            byte[] datenofrmt = _file.ReadBytes(3);
             if (datenofrmt[0] < 50)
             {
                 byte[] year = Encoding.ASCII.GetBytes($"{2000 + datenofrmt[0]}");
@@ -140,7 +136,7 @@ namespace psxt001z
         {
             _file.Seek(0x9368, SeekOrigin.Begin);
             byte[] sizebuf = new byte[4];
-            _file.Read(sizebuf, 0, 4);
+            _ = _file.Read(sizebuf, 0, 4);
             return BitConverter.ToInt32(sizebuf, 0);
         }
     }

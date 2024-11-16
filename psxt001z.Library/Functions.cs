@@ -63,7 +63,7 @@ namespace psxt001z
             file.Seek(51744, SeekOrigin.Begin);
             while (Encoding.ASCII.GetString(buffer) != "SYSTEM.CNF")
             {
-                file.Read(buffer, 0, 10);
+                _ = file.Read(buffer, 0, 10);
                 buffer[10] = 0;
                 file.Seek(-9, SeekOrigin.Current);
             }
@@ -71,22 +71,22 @@ namespace psxt001z
             file.Seek(-32, SeekOrigin.Current);
             uint lba = file.ReadUInt32();
             file.Seek((2352 * lba) + 29, SeekOrigin.Begin);
-            file.Read(buffer, 0, 6);
+            _ = file.Read(buffer, 0, 6);
             buffer[6] = 0;
             while (Encoding.ASCII.GetString(buffer) != "cdrom:")
             {
                 file.Seek(-5, SeekOrigin.Current);
-                file.Read(buffer, 0, 6);
+                _ = file.Read(buffer, 0, 6);
             }
 
-            file.Read(buffer, 0, 1);
+            _ = file.Read(buffer, 0, 1);
             if (buffer[0] != '\\')
                 file.Seek(-1, SeekOrigin.Current);
 
             int i = -1;
             do
             {
-                file.Read(buffer, ++i, 1);
+                _ = file.Read(buffer, ++i, 1);
             } while (buffer[i] != ';');
 
             for (int a = 0; a < i; a++)
