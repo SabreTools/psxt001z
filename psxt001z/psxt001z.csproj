@@ -1,40 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <!-- Assembly Properties -->
-    <TargetFrameworks>net20;net35;net40;net452;net462;net472;net48;netcoreapp3.1;net5.0;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-    <OutputType>Exe</OutputType>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Version>0.21-rc2</Version>
+    <PropertyGroup>
+        <!-- Assembly Properties -->
+        <TargetFrameworks>net20;net35;net40;net452;net462;net472;net48;netcoreapp3.1;net5.0;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+        <OutputType>Exe</OutputType>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <CheckEolTargetFramework>false</CheckEolTargetFramework>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Version>0.21-rc2</Version>
 
-    <!-- Package Properties -->
-    <Authors>Kirill Korolyov, Matt Nadareski</Authors>
-    <Description>C# port of psxt001z</Description>
-    <Copyright>Copyright (c)2013 Dremora, Copyright (c)2018-2024 Matt Nadareski</Copyright>
-    <RepositoryUrl>https://github.com/SabreTools/psxt001z</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+        <!-- Package Properties -->
+        <Authors>Kirill Korolyov, Matt Nadareski</Authors>
+        <Description>C# port of psxt001z</Description>
+        <Copyright>Copyright (c)2013 Dremora, Copyright (c)2018-2024 Matt Nadareski</Copyright>
+        <RepositoryUrl>https://github.com/SabreTools/psxt001z</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
 
-  <!-- Support All Frameworks -->
-  <PropertyGroup Condition="$(TargetFramework.StartsWith(`net2`)) OR $(TargetFramework.StartsWith(`net3`)) OR $(TargetFramework.StartsWith(`net4`))">
-      <RuntimeIdentifiers>win-x86;win-x64</RuntimeIdentifiers>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(TargetFramework.StartsWith(`netcoreapp`)) OR $(TargetFramework.StartsWith(`net5`))">
-      <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64</RuntimeIdentifiers>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(TargetFramework.StartsWith(`net6`)) OR $(TargetFramework.StartsWith(`net7`)) OR $(TargetFramework.StartsWith(`net8`)) OR $(TargetFramework.StartsWith(`net9`))">
-      <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith(`osx-arm`))">
-      <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-  </PropertyGroup>
+    <!-- Support All Frameworks -->
+    <PropertyGroup Condition="$(TargetFramework.StartsWith(`net2`)) OR $(TargetFramework.StartsWith(`net3`)) OR $(TargetFramework.StartsWith(`net4`))">
+        <RuntimeIdentifiers>win-x86;win-x64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(TargetFramework.StartsWith(`netcoreapp`)) OR $(TargetFramework.StartsWith(`net5`))">
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(TargetFramework.StartsWith(`net6`)) OR $(TargetFramework.StartsWith(`net7`)) OR $(TargetFramework.StartsWith(`net8`)) OR $(TargetFramework.StartsWith(`net9`))">
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith(`osx-arm`))">
+        <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\psxt001z.Library\psxt001z.Library.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\psxt001z.Library\psxt001z.Library.csproj" />
+    </ItemGroup>
+
+    <!-- Support for old .NET versions -->
+    <ItemGroup Condition="$(TargetFramework.StartsWith(`net2`))">
+        <PackageReference Include="Net30.LinqBridge" Version="1.3.0" />
+    </ItemGroup>
 
 </Project>
