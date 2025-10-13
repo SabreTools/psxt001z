@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using SabreTools.IO.Extensions;
 using static psxt001z.LibCrypt;
 
 namespace psxt001z
@@ -505,8 +506,8 @@ namespace psxt001z
             sha1.TransformFinalBlock(Message_Digest, 0, Message_Digest.Length);
 
             Console.WriteLine($"\rCRC-32: {crc.Hash:8x}                      \n");
-            Console.WriteLine($"MD5:    {GetHexString(md5.Hash!)}");
-            Console.WriteLine($"SHA-1:  {GetHexString(sha1.Hash!)}");
+            Console.WriteLine($"MD5:    {md5.Hash.ToHexString()}");
+            Console.WriteLine($"SHA-1:  {sha1.Hash.ToHexString()}");
             Console.WriteLine();
             return 1;
         }

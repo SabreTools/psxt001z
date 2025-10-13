@@ -22,12 +22,6 @@ namespace psxt001z
         /// <summary>
         /// Get a santized hex string from an input byte array
         /// </summary>
-        public static string GetHexString(byte[] bytes) =>
-            BitConverter.ToString(bytes).Replace("-", string.Empty);
-
-        /// <summary>
-        /// Get a santized hex string from an input byte array
-        /// </summary>
         public static string GetHexString(byte[] bytes, int startIndex, int length) =>
             BitConverter.ToString(bytes, startIndex, length).Replace("-", string.Empty);
     }
