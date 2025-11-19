@@ -27,15 +27,15 @@ namespace psxt001z
                     break;
 
                 case "--libcrypt" or "-l":
-                    DetectLibCrypt(args.Skip(2).ToArray());
+                    DetectLibCrypt([.. args.Skip(2)]);
                     break;
 
                 case "--libcryptdrv":
-                    DetectLibCryptDrive(args.Skip(2).ToArray());
+                    DetectLibCryptDrive([.. args.Skip(2)]);
                     break;
 
                 case "--libcryptdrvfast":
-                    DetectLibCryptDriveFast(args.Skip(2).ToArray());
+                    DetectLibCryptDriveFast([.. args.Skip(2)]);
                     break;
 
                 case "--xorlibcrypt":
