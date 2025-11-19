@@ -11,7 +11,7 @@
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <Version>0.21-rc2</Version>
+        <Version>0.21-rc3</Version>
 
         <!-- Package Properties -->
         <Authors>Kirill Korolyov, Matt Nadareski</Authors>

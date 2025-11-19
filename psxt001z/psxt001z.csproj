@@ -9,7 +9,7 @@
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <Version>0.21-rc2</Version>
+        <Version>0.21-rc3</Version>
 
         <!-- Package Properties -->
         <Authors>Kirill Korolyov, Matt Nadareski</Authors>
