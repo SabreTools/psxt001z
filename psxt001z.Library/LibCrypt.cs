@@ -115,7 +115,7 @@ namespace psxt001z
 
             // sbi
             Stream? sbi = null;
-            if (args.Length > 1 && args[1] != null)
+            if (args.Length > 1 && args[1] is not null)
             {
                 sbi = File.OpenWrite(args[1]);
                 sbi.Write(Encoding.ASCII.GetBytes("SBI\0"), 0, 4);
@@ -184,7 +184,7 @@ namespace psxt001z
 
                     Console.WriteLine("");
                     psectors++;
-                    if (sbi != null)
+                    if (sbi is not null)
                     {
                         sbi.Write(sub, 7, 3);
                         sbi.Write([0x01], 0, 1);

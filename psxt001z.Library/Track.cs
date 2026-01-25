@@ -184,7 +184,7 @@ namespace psxt001z
         private bool Calculate()
         {
             var calc = new CRC32();
-            if (_smallFile && _fileContents != null)
+            if (_smallFile && _fileContents is not null)
             {
                 if (_isRiff)
                     calc.Calculate(_riff, 0, 44);
