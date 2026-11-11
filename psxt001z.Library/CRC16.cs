@@ -1,6 +1,7 @@
 ﻿namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/functions.cpp"/>
+    /// TODO: Replace with SabreTools.Hashing
     public class CRC16
     {
         /// <summary>
@@ -50,7 +51,7 @@
                 cksum = (ushort)(table[((cksum >> 8) ^ buf[bufPtr++]) & 0xFF] ^ (cksum << 8));
             }
 
-            return (ushort)(~cksum);
+            return (ushort)~cksum;
         }
     }
 }

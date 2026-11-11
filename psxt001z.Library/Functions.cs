@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using SabreTools.IO.Extensions;
+using SabreTools.Numerics.Extensions;
 
 namespace psxt001z
 {
@@ -49,7 +49,7 @@ namespace psxt001z
         {
             long currentposition = file.Position;
             file.Seek(30572, SeekOrigin.Begin);
-            uint buffer = file.ReadUInt32();
+            uint buffer = file.ReadUInt32LittleEndian();
             file.Seek(currentposition, SeekOrigin.Begin);
             return buffer == 0;
         }
@@ -69,7 +69,7 @@ namespace psxt001z
             }
 
             file.Seek(-32, SeekOrigin.Current);
-            uint lba = file.ReadUInt32();
+            uint lba = file.ReadUInt32LittleEndian();
             file.Seek((2352 * lba) + 29, SeekOrigin.Begin);
             _ = file.Read(buffer, 0, 6);
             buffer[6] = 0;

@@ -12,17 +12,17 @@ namespace psxt001z
         /// <summary>
         /// BCD to Byte
         /// </summary>
-        public static byte BinaryToInteger(byte b) => (byte)(b / 16 * 10 + b % 16);
+        public static byte BinaryToInteger(byte b) => (byte)((b / 16 * 10) + (b % 16));
 
         /// <summary>
         /// Byte to BCD
         /// </summary>
-        public static byte IntegerToBinary(byte i) => (byte)(i / 10 * 16 + i % 10);
+        public static byte IntegerToBinary(byte i) => (byte)((i / 10 * 16) + (i % 10));
 
         /// <summary>
         /// Get a santized hex string from an input byte array
         /// </summary>
-        public static string GetHexString(byte[] bytes, int startIndex, int length) =>
-            BitConverter.ToString(bytes, startIndex, length).Replace("-", string.Empty);
+        public static string GetHexString(byte[] bytes, int startIndex, int length)
+            => BitConverter.ToString(bytes, startIndex, length).Replace("-", string.Empty);
     }
 }

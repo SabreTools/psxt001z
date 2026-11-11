@@ -67,13 +67,13 @@ namespace psxt001z
             for (int i = 0; i < 12; i++)
             {
                 buffertmp[i] |= (byte)((buffer[i * 8] & 0x40) << 1);
-                buffertmp[i] |= (byte)((buffer[i * 8 + 1] & 0x40));
-                buffertmp[i] |= (byte)((buffer[i * 8 + 2] & 0x40) >> 1);
-                buffertmp[i] |= (byte)((buffer[i * 8 + 3] & 0x40) >> 2);
-                buffertmp[i] |= (byte)((buffer[i * 8 + 4] & 0x40) >> 3);
-                buffertmp[i] |= (byte)((buffer[i * 8 + 5] & 0x40) >> 4);
-                buffertmp[i] |= (byte)((buffer[i * 8 + 6] & 0x40) >> 5);
-                buffertmp[i] |= (byte)((buffer[i * 8 + 7] & 0x40) >> 6);
+                buffertmp[i] |= (byte)(buffer[(i * 8) + 1] & 0x40);
+                buffertmp[i] |= (byte)((buffer[(i * 8) + 2] & 0x40) >> 1);
+                buffertmp[i] |= (byte)((buffer[(i * 8) + 3] & 0x40) >> 2);
+                buffertmp[i] |= (byte)((buffer[(i * 8) + 4] & 0x40) >> 3);
+                buffertmp[i] |= (byte)((buffer[(i * 8) + 5] & 0x40) >> 4);
+                buffertmp[i] |= (byte)((buffer[(i * 8) + 6] & 0x40) >> 5);
+                buffertmp[i] |= (byte)((buffer[(i * 8) + 7] & 0x40) >> 6);
             }
 
             Array.Copy(buffertmp, buffer, 12);
@@ -152,13 +152,13 @@ namespace psxt001z
                         tpos++;
 
                     sub[3] = IntegerToBinary((byte)(tpos / 60 / 75));
-                    sub[4] = IntegerToBinary((byte)((tpos / 75) % 60));
+                    sub[4] = IntegerToBinary((byte)(tpos / 75 % 60));
                     sub[5] = IntegerToBinary((byte)(tpos % 75));
                 }
 
                 //MSF2 [7-9]
                 sub[7] = IntegerToBinary((byte)(sector / 60 / 75));
-                sub[8] = IntegerToBinary((byte)((sector / 75) % 60));
+                sub[8] = IntegerToBinary((byte)(sector / 75 % 60));
                 sub[9] = IntegerToBinary((byte)(sector % 75));
 
                 // CRC-16 [10-11]
@@ -214,10 +214,10 @@ namespace psxt001z
             for (i = 0; i < LIBCRYPT_NUM_SECTORS; i++)
             {
                 sub[3] = IntegerToBinary((byte)(lc_addresses[i] / 60 / 75));
-                sub[4] = IntegerToBinary((byte)((lc_addresses[i] / 75) % 60));
+                sub[4] = IntegerToBinary((byte)(lc_addresses[i] / 75 % 60));
                 sub[5] = IntegerToBinary((byte)(lc_addresses[i] % 75));
                 sub[7] = IntegerToBinary((byte)((lc_addresses[i] + 150) / 60 / 75));
-                sub[8] = IntegerToBinary((byte)(((lc_addresses[i] + 150) / 75) % 60));
+                sub[8] = IntegerToBinary((byte)((lc_addresses[i] + 150) / 75 % 60));
                 sub[9] = IntegerToBinary((byte)((lc_addresses[i] + 150) % 75));
                 crc = CRC16.Calculate(sub, 0, 10);
                 sub[10] = (byte)(crc >> 8);
@@ -225,7 +225,7 @@ namespace psxt001z
 
                 Console.WriteLine($"{lc_addresses[i]} {GetHexString(sub, 7, 3)}");
                 Console.WriteLine($" {GetHexString(sub, 0, 10)} {GetHexString(sub, 10, 2)}");
-                Console.WriteLine($" {GetHexString(lc1_sectors_contents, i * 12, 10)} {GetHexString(lc1_sectors_contents, i * 12 + 10, 2)}");
+                Console.WriteLine($" {GetHexString(lc1_sectors_contents, i * 12, 10)} {GetHexString(lc1_sectors_contents, (i * 12) + 10, 2)}");
 
                 d = 0;
 

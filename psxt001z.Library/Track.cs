@@ -129,6 +129,7 @@ namespace psxt001z
                     if (_file.Read(_fileContents, (int)i, 1) == 0)
                         _fileContents[i] = 0x00;
                 }
+
                 _smallFile = true;
             }
         }
@@ -206,12 +207,13 @@ namespace psxt001z
                         buffer[0] = 0x00;
                         _file.Seek(_start + _offset + i + 1, SeekOrigin.Begin);
                     }
+
                     calc.Calculate(buffer, 0, 1);
                 }
             }
 
             Console.WriteLine($"Offset correction {_offset} bytes, {_offset / 4} samples, CRC-32 {calc.Hash:08x}");
-            return (calc.Hash == _crc);
+            return calc.Hash == _crc;
         }
 
         public void Done()

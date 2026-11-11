@@ -71,7 +71,7 @@ namespace psxt001z
                 }
             }
 
-            int start_sector = (BinaryToInteger(sector[offset + 12]) * 60 + BinaryToInteger(sector[offset + 13])) * 75 + BinaryToInteger(sector[offset + 14]) - 150;
+            int start_sector = (((BinaryToInteger(sector[offset + 12]) * 60) + BinaryToInteger(sector[offset + 13])) * 75) + BinaryToInteger(sector[offset + 14]) - 150;
 
             Console.WriteLine($"MSF: {sector[offset + 12]:2x}:{sector[offset + 12 + 1]:2x}:{sector[offset + 12 + 2]:2x}");
 

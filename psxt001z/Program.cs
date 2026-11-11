@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using SabreTools.IO.Extensions;
+using SabreTools.Text.Extensions;
 using static psxt001z.LibCrypt;
 
 namespace psxt001z
@@ -61,6 +61,7 @@ namespace psxt001z
                 case "--track" when args.Length >= 5 && args.Length <= 9:
                     var trackfix = new Track(args);
                     while (!trackfix.GuessOffsetCorrection()) { }
+
                     trackfix.Done();
                     break;
 
@@ -178,6 +179,7 @@ namespace psxt001z
                 case 0x6773d4db: Console.WriteLine("US Alt NoEDC"); break;
                 default: Console.WriteLine($"Unknown, crc {imagecrc:x}"); break;
             }
+
             Console.WriteLine();
 
             image.Close();
@@ -310,11 +312,15 @@ namespace psxt001z
                 case 2:
                     Console.Write($"File \"{args[1]}\" was successfully truncated to {newsize} bytes!");
                     break;
+
+                default:
+                    break;
             }
 
             return true;
         }
 
+#pragma warning disable IDE0051 // Remove unused private members
         private static bool Copy(string[] args)
         {
             //args[1] - infile
@@ -338,6 +344,7 @@ namespace psxt001z
             //SetFilePointer(hfile, newsize, 0, FILE_BEGIN);
             //SetEndOfFile(hfile);
         }
+#pragma warning restore IDE0051 // Remove unused private members
 
         private static void AntiZektor(string filename)
         {
@@ -349,7 +356,7 @@ namespace psxt001z
 
             for (int a = 0; a < 256; a++)
             {
-                int b = ((a << 1) ^ ((a & 0x80) != 0 ? 0x11D : 0));
+                int b = (a << 1) ^ ((a & 0x80) != 0 ? 0x11D : 0);
 
                 ecc_f_lut[a] = (byte)b;
                 ecc_b_lut[a ^ b] = (byte)a;
@@ -375,11 +382,11 @@ namespace psxt001z
             Console.WriteLine("Converting image...");
             for (long sector = 0; sector < sectors; sector++)
             {
-                image.Seek(sector * 2352 + 18, SeekOrigin.Begin);
+                image.Seek((sector * 2352) + 18, SeekOrigin.Begin);
 
                 byte[] z = new byte[1];
                 _ = image.Read(z, 0, 1);
-                if ((z[0] >> 5 & 0x1) != 0)
+                if (((z[0] >> 5) & 0x1) != 0)
                 {
                     image.Seek(-3, SeekOrigin.Current);
 
@@ -681,10 +688,10 @@ namespace psxt001z
                 return;
             }
 
-            long sectors = filesize / 2336;
+            // long sectors = filesize / 2336;
             Stream video = File.OpenWrite(args[3]);
 
-            sectors = filesize / 2336;
+            long sectors = filesize / 2336;
             Stream audio = File.OpenWrite(args[4]);
 
             for (long i = 0; i < sectors; i++)
@@ -695,7 +702,7 @@ namespace psxt001z
                 _ = str.Read(ctrlbyte, 0, 1);
 
                 byte[] buffer = new byte[2336];
-                if ((ctrlbyte[0] >> 5 & 0x1) != 0)
+                if (((ctrlbyte[0] >> 5) & 0x1) != 0)
                 {
                     str.Seek(-3, SeekOrigin.Current);
                     _ = str.Read(buffer, 0, 2336);
@@ -842,7 +849,7 @@ namespace psxt001z
                     subchannel.WriteByte(0x00);
                 }
 
-                Console.Write($"Creating: {(100 * sector) / sectors}%\r");
+                Console.Write($"Creating: {100 * sector / sectors}%\r");
             }
 
             subchannel.Seek(0, SeekOrigin.Begin);
@@ -875,11 +882,11 @@ namespace psxt001z
             long sectors = filesize / 2352;
             for (long sector = 0; sector < sectors; sector++)
             {
-                image.Seek(sector * 2352 + 18, SeekOrigin.Begin);
+                image.Seek((sector * 2352) + 18, SeekOrigin.Begin);
 
                 byte[] z = new byte[1];
                 _ = image.Read(z, 0, 1);
-                if ((z[0] >> 5 & 0x1) != 0)
+                if (((z[0] >> 5) & 0x1) != 0)
                 {
                     image.Seek(2329, SeekOrigin.Current);
                     image.Write(zero, 0, 4);

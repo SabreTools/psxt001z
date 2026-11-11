@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <!-- Assembly Properties -->
-        <TargetFrameworks>net20;net35;net40;net452;net462;net472;net48;netcoreapp3.1;net5.0;net6.0;net7.0;net8.0;net9.0;net10.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net20;net35;net40;net452;net462;net472;net48;netcoreapp3.1;net5.0;net6.0;net7.0;net8.0;net9.0;net10.0;net11.0;netstandard2.0;netstandard2.1</TargetFrameworks>
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <IncludeSymbols>true</IncludeSymbols>
@@ -16,7 +16,7 @@
         <!-- Package Properties -->
         <Authors>Kirill Korolyov, Matt Nadareski</Authors>
         <Description>C# port of psxt001z as a library</Description>
-        <Copyright>Copyright (c)2013 Dremora, Copyright (c)2018-2025 Matt Nadareski</Copyright>
+        <Copyright>Copyright (c)2013 Dremora, Copyright (c)2018-2026 Matt Nadareski</Copyright>
         <PackageProjectUrl>https://github.com/SabreTools/</PackageProjectUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/SabreTools/psxt001z</RepositoryUrl>
@@ -30,8 +30,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Net30.LinqBridge" Version="1.6.0" Condition="$(TargetFramework.StartsWith(`net2`))" />
-        <PackageReference Include="SabreTools.IO" Version="[1.9.0]" />
+        <PackageReference Include="Net30.LinqBridge" Version="1.6.0.2" Condition="$(TargetFramework.StartsWith(`net2`))" />
+        <PackageReference Include="SabreTools.IO" Version="2.4.0" />
     </ItemGroup>
 
 </Project>

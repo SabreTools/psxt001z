@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using SabreTools.IO.Extensions;
+using SabreTools.Numerics.Extensions;
 
 namespace psxt001z
 {
@@ -29,7 +30,7 @@ namespace psxt001z
             }
 
             _file.Seek(-32, SeekOrigin.Current);
-            uint lba = _file.ReadUInt32();
+            uint lba = _file.ReadUInt32LittleEndian();
 
             _file.Seek((2352 * lba) + 29, SeekOrigin.Begin);
             byte[] buffer = _file.ReadBytes(6);

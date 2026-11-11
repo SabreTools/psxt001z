@@ -1,6 +1,7 @@
 ﻿namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/main.cpp"/>
+    /// TODO: Replace with SabreTools.Hashing
     public class CRC32
     {
         private const uint CRC_POLY = 0xEDB88320;
@@ -32,7 +33,7 @@
             uint crc = Hash;
             while (nLen-- > 0)
             {
-                crc = table[(byte)(crc ^ pData[pDataPtr++])] ^ crc >> 8;
+                crc = table[(byte)(crc ^ pData[pDataPtr++])] ^ (crc >> 8);
                 crc ^= CRC_MASK;
             }
 

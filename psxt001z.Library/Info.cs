@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using SabreTools.IO.Extensions;
+using SabreTools.Numerics.Extensions;
 
 namespace psxt001z
 {
     /// <see href="https://github.com/Dremora/psxt001z/blob/master/info.cpp"/>
     public partial class LibCrypt
     {
+#pragma warning disable IDE0052 // Remove unread private members
         private static readonly byte[] edc_form_2 = [0x3F, 0x13, 0xB0, 0xBE];
+#pragma warning restore IDE0052 // Remove unread private members
 
         private static readonly byte[] syncheader = [0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00];
 
@@ -55,6 +57,7 @@ namespace psxt001z
             {
                 sectorsize = 2048;
             }
+
             if (size % sectorsize != 0)
             {
                 Console.WriteLine($"{filename}: not ModeX/{sectorsize} image!");
@@ -86,10 +89,10 @@ namespace psxt001z
 
             #region Size
 
-            image.Seek(sectorsize * 16 + ((syncheader[15] == 2) ? 24 : ((syncheader[15] == 1) ? 16 : 0)) + 0x50, SeekOrigin.Begin);
+            image.Seek((sectorsize * 16) + ((syncheader[15] == 2) ? 24 : ((syncheader[15] == 1) ? 16 : 0)) + 0x50, SeekOrigin.Begin);
 
             // ISO size
-            int realsectors = image.ReadInt32();
+            int realsectors = image.ReadInt32LittleEndian();
             image.Seek(0, SeekOrigin.Begin);
             int realsize = realsectors * sectorsize;
 
@@ -154,11 +157,11 @@ namespace psxt001z
 
                 #region Postgap
 
-                image.Seek((sectors - 150) * sectorsize + 16, SeekOrigin.Begin);
+                image.Seek(((sectors - 150) * sectorsize) + 16, SeekOrigin.Begin);
                 _ = image.Read(buffer, 0, 2336);
 
                 string postgap = "Postgap type: Form ";
-                if ((buffer[2] >> 5 & 0x01) != 0)
+                if (((buffer[2] >> 5) & 0x01) != 0)
                 {
                     postgap += "2";
                     if (buffer.Take(8).SequenceEqual(subheader))
@@ -218,7 +221,7 @@ namespace psxt001z
                     {
                         image.Seek(sector * sectorsize, SeekOrigin.Begin);
                         image.Write(syncheader, 0, 16);
-                        sectorInfo += (" (fixed)");
+                        sectorInfo += " (fixed)";
                     }
                 }
 
@@ -240,7 +243,7 @@ namespace psxt001z
 
                     if (fix)
                     {
-                        image.Seek(sector * sectorsize + 16, SeekOrigin.Begin);
+                        image.Seek((sector * sectorsize) + 16, SeekOrigin.Begin);
                         image.Write(buffer2, 0, 2336);
                         sectorInfo += " (fixed)";
                     }
